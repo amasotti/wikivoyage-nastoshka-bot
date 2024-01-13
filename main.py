@@ -1,16 +1,26 @@
-# This is a sample Python script.
-
-# Press ⌃R to execute it or replace it with your code.
-# Press Double ⇧ to search everywhere for classes, files, tool windows, actions, and settings.
+from bot.wikivoyage import *
 
 
-def print_hi(name):
-    # Use a breakpoint in the code line below to debug your script.
-    print(f'Hi, {name}')  # Press ⌘F8 to toggle the breakpoint.
+def main():
+    site = login()
+    # template = "Citylist"
+    # articles = get_used_by(site,template)
+    # for article in articles:
+    #     print(article.title())
+
+    testo = get_page_text(site, "Germania")
+    destinazioni = parse_listed_cities(testo)
+    # for destinazione in destinazioni:
+    #     print(destinazione)
+
+    # Get the last one in the list
+    last_destinazione = destinazioni[-1]
+    last_destinazione[1]["wikidata"] = "Q1234"
+    print(last_destinazione[1]['nome'])
+    print(last_destinazione[1]['wikidata'])
+    print(last_destinazione)
 
 
-# Press the green button in the gutter to run the script.
-if __name__ == '__main__':
-    print_hi('PyCharm')
 
-# See PyCharm help at https://www.jetbrains.com/help/pycharm/
+if __name__ == "__main__":
+    main()
