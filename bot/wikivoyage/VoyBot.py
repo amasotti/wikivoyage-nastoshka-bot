@@ -42,6 +42,6 @@ class WikivoyageBot(WikiBot):
             pywikibot.logging.stdout(f"\tFound wikidata item for {name}: {wikidata_id}")
             template.add("wikidata", wikidata_id)
 
-    def write_log_line(self, text, file="logs/citylist_log.txt"):
+    def write_log_line(self, text, file="logs/citylist_log.log"):
         with open(file, "a") as f:
             f.write(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} {text}\n")
