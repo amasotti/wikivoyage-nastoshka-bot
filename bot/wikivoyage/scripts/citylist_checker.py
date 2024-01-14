@@ -35,7 +35,7 @@ def run_citylist_wikidata_check(lang="it", total=1):
         page = wikivoyage_bot.get_page(article.title())
         updated_wikitext = str(wikicode)
         page.text = updated_wikitext
-        page.save("Aggiungo wikidata ids",
+        page.save(f"Aggiungo wikidata ids ai template citylist e destinationlist di {article.title()}",
                   watch='watch',
                   minor=True,
                   )

@@ -26,6 +26,27 @@ class WikidataBot:
                     return True
         return False
 
+    def _truncate_coordinates(self, coords):
+        return tuple(format(x, '.6g') for x in coords)
+
+    def get_lat_long(self, wikidata_item):
+        """
+        Get the latitude and longitude of a given wikidata item
+        :param wikidata_item:
+        :return:
+        """
+        item = pywikibot.ItemPage(site=self.site, title=wikidata_item)
+        item_dict = item.get()
+        claims = item_dict["claims"]
+        coords = (None, None)
+        if COORDINATES in claims:
+            for claim in claims[COORDINATES]:
+                coords = claim.getTarget().lat, claim.getTarget().lon
+
+                # Preserve only 6 digits in total for lat and long
+                coords = self._truncate_coordinates(coords)
+        return coords
+
     def _clean_city_name(self, city_name):
         """
         Clean the city name from brackets or alternative names

@@ -9,6 +9,8 @@ class WikivoyageBot(WikiBot):
     def __init__(self, lang="it"):
         super().__init__(lang, fam="wikivoyage")
         self.current_page = None
+        self.wd_bot = WikidataBot()
+
 
     def set_current_page(self, page):
         """
@@ -41,7 +43,6 @@ class WikivoyageBot(WikiBot):
         :param templates:
         :return:
         """
-        wd_bot = WikidataBot()
         for template in templates:
 
             # Conditions
@@ -51,10 +52,35 @@ class WikivoyageBot(WikiBot):
 
             if is_target_template and not has_wikidata:
                 name = template.get("nome").value.strip()
-                alt = template.get("alt").value.strip()
-                wikidata_id = wd_bot.get_wikidata_entity_by_wikipedia_article_name(name, alt, lang='it')
+                try:
+                    alt = template.get("alt").value.strip()
+                except:
+                    alt = ""
+                wikidata_id = self.wd_bot.get_wikidata_entity_by_wikipedia_article_name(name, alt, lang='it')
+                # Try to also add coordinates
+                self._process_coordinates(name, wikidata_id, template)
                 self._process_wikidata(name, wikidata_id, template)
         return templates
+
+    def _process_coordinates(self, name, wikidata_id, template):
+        """
+        Add the coordinates to the template if they exist. Basically a check that the given coordinates
+        are not None. Also logs the operation
+        :param name: str, the name of the city
+        :param wikidata_id: str, the wikidata id of the city
+        :param template: the template to update
+        :return: None (updates the template in place)
+        """
+        if wikidata_id == "" or wikidata_id is None:
+            return None
+
+        coords = self.wd_bot.get_lat_long(wikidata_id)
+        if coords[0] is None:
+            pywikibot.logging.stdout(f"\tCould not find coordinates for {name} -- keeping empty")
+        else:
+            pywikibot.logging.stdout(f"\tFound coordinates for {name}: {coords}")
+            template.add("lat", coords[0], before="descrizione", preserve_spacing=True)
+            template.add("long", coords[1], before="descrizione", preserve_spacing=True)
 
     def _process_wikidata(self, name, wikidata_id, template):
         """
