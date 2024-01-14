@@ -1,0 +1,2 @@
+pywikibot~=8.6.0
+mwparserfromhell~=0.6.6
