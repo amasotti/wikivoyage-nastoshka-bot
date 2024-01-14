@@ -43,6 +43,7 @@ class WikivoyageBot(WikiBot):
         """
         wd_bot = WikidataBot()
         for template in templates:
+
             # Conditions
             is_target_template = (template.name == CITY_TEMPLATE_ITEM_NAME
                                   or template.name == DESTINATION_TEMPLATE_ITEM_NAME)
@@ -69,7 +70,7 @@ class WikivoyageBot(WikiBot):
             self.write_log_line(f"{self.current_page} -- No wikidata item found for {name}")
         else:
             pywikibot.logging.stdout(f"\tFound wikidata item for {name}: {wikidata_id}")
-            template.add("wikidata", wikidata_id)
+            template.add("wikidata", wikidata_id, before="descrizione", preserve_spacing=True)
 
     def write_log_line(self, text, file="logs/citylist_log.log"):
         """

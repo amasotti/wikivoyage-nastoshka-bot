@@ -1,4 +1,6 @@
 # wikidata_bot.py
+import re
+
 import pywikibot
 from pywikibot.pagegenerators import WikidataSPARQLPageGenerator
 
@@ -7,7 +9,22 @@ class WikidataBot:
         self.site = pywikibot.Site().data_repository()
 
     def _clean_city_name(self, city_name):
-        return city_name.replace("[", "").replace("]", "").strip()
+        """
+        Clean the city name from brackets or alternative names
+        It could be found in the wikitext in the following formats:
+        - [[City name]] -- remove the brackets
+        - [[City name|Alt name]] -- remove the brackets and the alternative name
+        - City Name -- keep as it is
+        :param city_name: City name to clean
+        :return: The cleaned city name
+        """
+        # Remove brackets
+        city_name = city_name.replace("[[", "").replace("]]", "")
+
+        # Remove alternative names
+        city_name = re.sub(r'\|.*', '', city_name)
+
+        return city_name
 
     def get_wikidata_entity_by_wikipedia_article_name(self,article_name, alt, lang='it'):
 
