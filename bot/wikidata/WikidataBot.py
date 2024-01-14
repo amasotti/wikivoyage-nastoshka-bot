@@ -3,6 +3,7 @@ import re
 
 import pywikibot
 from pywikibot.pagegenerators import WikidataSPARQLPageGenerator
+
 from bot.wikidata.constants import *
 
 
@@ -16,7 +17,7 @@ class WikidataBot:
         :param wikidata_item:
         :return:
         """
-        item = pywikibot.ItemPage(self.site, wikidata_item)
+        item = pywikibot.ItemPage(site=self.site, title=wikidata_item)
         item_dict = item.get()
         claims = item_dict["claims"]
         if IS_INSTANCE_OF in claims:
@@ -43,30 +44,30 @@ class WikidataBot:
 
         return city_name
 
-    def get_wikidata_entity_by_wikipedia_article_name(self,article_name, alt, lang='it'):
+    def get_wikidata_entity_by_wikipedia_article_name(self, article_name, alt, lang='it'):
+        # Try languages in the given order until we find one
+        for attempted_lang in [lang, 'en']:
+            wikidata_item = self.try_entity_retrieval(article_name, attempted_lang)
+            if wikidata_item:
+                break
+        # Lastly, try alt name in English if entity is still not found
+        if not wikidata_item:
+            wikidata_item = self.try_entity_retrieval(alt, 'en')
+        return self.finalize_wikidata_item(wikidata_item, article_name)
 
-        # Try in italian or the language passed
-        wikidata_item = self.run_query(article_name, lang)
+    def try_entity_retrieval(self, article_name, lang):
+        item = self.run_query(article_name, lang)
+        return item if item else None
 
-        # If not found, try in english
-        if wikidata_item is None:
-            wikidata_item = self.run_query(article_name, 'en')
-
-        # One last try with the alt name
-        if wikidata_item is None:
-            wikidata_item = self.run_query(alt, 'en')
-
-        if wikidata_item is None:
+    def finalize_wikidata_item(self, wikidata_item, article_name):
+        if not wikidata_item:
             print(f"\t\tCould not find wikidata item for {article_name} -- keeping empty")
-            wikidata_item = ""
-
-        is_disambiguation = self.is_disambiguation(wikidata_item)
-
-        if is_disambiguation:
+            return ""
+        elif self.is_disambiguation(wikidata_item):
             self.write_log_line(f"Wikidata item for {article_name} is a disambiguation page\n")
-            wikidata_item = ""
-
-        return wikidata_item
+            return ""
+        else:
+            return wikidata_item
 
     def run_query(self, entity_label, lang='it'):
         """
