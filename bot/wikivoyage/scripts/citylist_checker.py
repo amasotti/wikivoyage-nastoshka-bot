@@ -4,17 +4,17 @@ import pywikibot
 from bot.wikivoyage import WikivoyageBot
 
 
-def run_citylist_wikidata_check():
+def run_citylist_wikidata_check(lang="it", total=1):
     """
     Run the citylist wikidata check - this will add wikidata ids to citylist items
     if the wikidata id is not already present and can be found with certainty (multiple wikidata items
     for the same city name are not allowed)
     :return: None
     """
-    wikivoyage_bot = WikivoyageBot(lang="it")
+    wikivoyage_bot = WikivoyageBot(lang=lang)
 
     # Example usage of listing a category
-    articles = wikivoyage_bot.listify_category("Itemlist con errori di compilazione", 1)
+    articles = wikivoyage_bot.listify_category("Itemlist con errori di compilazione", total)
 
     # Read the text of the article
     for article in articles:
