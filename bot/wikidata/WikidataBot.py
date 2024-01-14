@@ -3,10 +3,27 @@ import re
 
 import pywikibot
 from pywikibot.pagegenerators import WikidataSPARQLPageGenerator
+from bot.wikidata.constants import *
+
 
 class WikidataBot:
     def __init__(self):
         self.site = pywikibot.Site().data_repository()
+
+    def is_disambiguation(self, wikidata_item):
+        """
+        Check if the given wikidata item is a disambiguation page
+        :param wikidata_item:
+        :return:
+        """
+        item = pywikibot.ItemPage(self.site, wikidata_item)
+        item_dict = item.get()
+        claims = item_dict["claims"]
+        if IS_INSTANCE_OF in claims:
+            for claim in claims[IS_INSTANCE_OF]:
+                if claim.getTarget().title() == IS_DISAMBIGUATION:
+                    return True
+        return False
 
     def _clean_city_name(self, city_name):
         """
@@ -43,6 +60,12 @@ class WikidataBot:
             print(f"\t\tCould not find wikidata item for {article_name} -- keeping empty")
             wikidata_item = ""
 
+        is_disambiguation = self.is_disambiguation(wikidata_item)
+
+        if is_disambiguation:
+            self.write_log_line(f"Wikidata item for {article_name} is a disambiguation page\n")
+            wikidata_item = ""
+
         return wikidata_item
 
     def run_query(self, entity_label, lang='it'):
@@ -75,3 +98,14 @@ class WikidataBot:
             print(f"\tFound zero or multiple wikidata item for {entity_label} -- skipping")
             return None
         return pages[0].title()
+
+    def write_log_line(self, text, file="logs/citylist_log.log"):
+        """
+        Write a line to the log file
+        :param text: the log line
+        :param file: the log file
+        :return: None
+        """
+        with open(file, 'a') as f:
+            f.write(text)
+            f.close()
