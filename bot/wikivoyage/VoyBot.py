@@ -13,26 +13,6 @@ class WikivoyageBot(WikiBot):
     def set_current_page(self, page):
         self.current_page = page
 
-    def get_page_text(self, p_name):
-        page = pywikibot.Page(self.site, title=p_name, ns=0)
-        return page.text
-
-    def listify_category(self, cat_name, total=4):
-        category = pywikibot.Category(self.site, title=cat_name)
-        return list(category.articles(recurse=True, total=total))
-
-    def get_page_templates(self, p_name):
-        page = pywikibot.Page(self.site, title=p_name, ns=0)
-        return page.templatesWithParams()
-
-    def get_pages_using_template(self, template_name, total=3):
-        template_page = pywikibot.Page(self.site, title=template_name, ns=10)
-        linked_pages = template_page.getReferences(
-            namespaces=0,
-            total=total,
-            only_template_inclusion=True)
-        return list(linked_pages)
-
     def parse_listed_destinations(self, wikitext):
         return self.parse_nested_template(wikitext, DESTINATION_TEMPLATE_ITEM_NAME)
 

@@ -3,6 +3,7 @@ import mwparserfromhell
 import pywikibot
 from bot.wikivoyage import WikivoyageBot
 
+
 def run_citylist_wikidata_check():
     """
     Run the citylist wikidata check - this will add wikidata ids to citylist items
@@ -38,5 +39,10 @@ def run_citylist_wikidata_check():
                   watch='watch',
                   minor=True,
                   )
-        wikivoyage_bot.write_log_line(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} {article.title()} -- Added wikidata ids\n")
+        # Log the operation
+        wikivoyage_bot.write_log_line(
+            f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} {article.title()} -- Added wikidata ids\n")
+
+        # Reset the current page
+        wikivoyage_bot.set_current_page(None)
     exit(0)
