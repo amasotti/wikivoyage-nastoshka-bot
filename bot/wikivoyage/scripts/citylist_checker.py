@@ -4,7 +4,7 @@ import pywikibot
 from bot.wikivoyage import WikivoyageBot
 
 
-def run_citylist_wikidata_check(lang="it", total=1):
+def citylist_wikidata_check(lang="it", total=1):
     """
     Run the citylist wikidata check - this will add wikidata ids to citylist items
     if the wikidata id is not already present and can be found with certainty (multiple wikidata items
@@ -35,7 +35,7 @@ def run_citylist_wikidata_check(lang="it", total=1):
         page = wikivoyage_bot.get_page(article.title())
         updated_wikitext = str(wikicode)
         page.text = updated_wikitext
-        page.save(f"Aggiungo wikidata ids ai template citylist e destinationlist di {article.title()}",
+        page.save(f"Aggiungo wikidata ids ai template citylist e destinationlist di {article.title()} [NastoshkaBot]",
                   watch='watch',
                   minor=True,
                   )
