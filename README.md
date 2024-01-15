@@ -9,6 +9,10 @@ At moment the only feature I'm working on is the `citylist` template updater.
 - `citylist template updater`: check the usages of `{{citylist}}` template with missing `wikidata` param, 
 retrieve the missing data from Wikidata and update the page.
 - `empty-da-sapere`: check the pages with empty "Da sapere" section and lists these pages in a report logfile.
+- `sort-template`: sort the params of a template in a page. Useful for `{{Citylist}}` template, where moving the
+different params is cumbersome. This script needs (to be improved and...) two additional params:
+    - `--target-page`: the page where the template is located and where the sorting will be applied
+    - `--target-template`: the name of the template to be sorted
 
 ## Usage
 

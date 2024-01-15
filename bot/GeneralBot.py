@@ -13,6 +13,7 @@ class WikiBot:
         :return: raw wiki text
         """
         page = pywikibot.Page(self.site, title=p_name, ns=namespace)
+        page.templates()
         return page.text
 
     def get_page(self, page_name, ns=0) -> pywikibot.Page:
