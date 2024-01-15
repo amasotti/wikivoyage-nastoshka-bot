@@ -167,3 +167,4 @@ apicache-py3/
 *.lwp
 user-config.py
 user-password.py
+output/**/*

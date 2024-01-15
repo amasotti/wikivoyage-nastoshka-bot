@@ -1,12 +1,14 @@
 import argparse
 
-from bot.wikivoyage import run_citylist_wikidata_check
+from bot.wikivoyage import run_citylist_wikidata_check, list_empty_daSapere
 
 
 def main(args):
     # Run the script
     if args.script == "citylist-checker":
         run_citylist_wikidata_check(args.lang, int(args.total))
+    elif args.script == "empty-da-sapere":
+        list_empty_daSapere(args.lang)
     else:
         raise ValueError(f"Unknown script: {args.script}")
 
