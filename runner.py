@@ -42,7 +42,8 @@ SCRIPT_DISPATCH_TABLE = {
 }
 
 
-def main(args):
+def run(args):
+    print("Checking for script" + args.script)
     script_function = SCRIPT_DISPATCH_TABLE.get(args.script)
 
     if script_function is None:
