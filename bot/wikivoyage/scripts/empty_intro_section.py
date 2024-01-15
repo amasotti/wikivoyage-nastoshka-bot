@@ -8,6 +8,7 @@ from bot.wikivoyage.aux import is_section_empty
 
 EMPTY_DA_SAPERE_LOG = "logs/empty_da_sapere.log"
 
+
 def list_empty_daSapere(lang="it"):
     """
     Run the citylist wikidata check - this will add wikidata ids to citylist items
@@ -31,21 +32,21 @@ def list_empty_daSapere(lang="it"):
         pywikibot.logging.stdout(f"Checking article: {article.title()} for empty 'Da sapere' section")
 
         # Get and parse the page wikicode
-        #updated_wikitext = wikivoyage_bot.get_page_text(article.title())
-        updated_wikitext = wikivoyage_bot.get_page_text("Alentejo Litorale")
+        # updated_wikitext = wikivoyage_bot.get_page_text(article.title())
+        updated_wikitext = wikivoyage_bot.get_page_text(article.title())
         wikicode = mwparserfromhell.parse(updated_wikitext)
 
         # Extract the templates from the page
-        sections = wikicode.get_sections(levels=[2,3],matches="Da sapere", include_headings=False)
+        sections = wikicode.get_sections(levels=[2, 3], matches="Da sapere", include_headings=False)
 
-        if len(sections) > 1:
-            raise ValueError(f"Too many 'Da sapere' sections in {article.title()}")
+        if len(sections) > 1 or len(sections) == 0:
+            print(ValueError(f"Too many 'Da sapere' sections in {article.title()}"))
+            continue
 
         is_empty = is_section_empty(str(sections[0]))
         if is_empty:
             write_log_entry_ifnot_exists(wikivoyage_bot)
     exit(0)
-
 
 
 def write_log_entry_ifnot_exists(wikivoyage_bot: WikivoyageBot):
@@ -63,7 +64,8 @@ def write_log_entry_ifnot_exists(wikivoyage_bot: WikivoyageBot):
         # Write the article to the log
         wikivoyage_bot.write_log_line(
             f"* [[{page_name}]] <small>(checked on {current_date})</small>",
-            file=EMPTY_DA_SAPERE_LOG
+            file=EMPTY_DA_SAPERE_LOG,
+            with_timestamp=False
         )
 
 
@@ -71,6 +73,7 @@ def create_log_file():
     if not os.path.exists(EMPTY_DA_SAPERE_LOG):
         with open(EMPTY_DA_SAPERE_LOG, "w") as f:
             f.write("")
+
 
 def check_page_has_been_reported(page_name) -> bool:
     with open(EMPTY_DA_SAPERE_LOG, "r") as f:

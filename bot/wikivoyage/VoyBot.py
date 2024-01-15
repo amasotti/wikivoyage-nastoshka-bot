@@ -98,7 +98,7 @@ class WikivoyageBot(WikiBot):
             pywikibot.logging.stdout(f"\tFound wikidata item for {name}: {wikidata_id}")
             template.add("wikidata", wikidata_id, before="descrizione", preserve_spacing=True)
 
-    def write_log_line(self, text, file="logs/citylist_log.log"):
+    def write_log_line(self, text, file="logs/citylist_log.log", with_timestamp=True):
         """
         Write a line to the log file
         :param text: the log line
@@ -106,4 +106,7 @@ class WikivoyageBot(WikiBot):
         :return: None
         """
         with open(file, "a") as f:
-            f.write(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} {text}\n")
+            if with_timestamp:
+                f.write(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} {text}\n")
+            else:
+                f.write(f"{text}\n")
