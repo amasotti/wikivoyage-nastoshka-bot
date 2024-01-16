@@ -1,4 +1,5 @@
 import pywikibot.logging
+from pywikibot import sleep
 
 from bot.wikivoyage import WikivoyageBot
 
@@ -22,6 +23,7 @@ def categorize_region_without_destinations(target="Stato"):
             to_be_categorized.append(article.title())
             if not bot.is_in_category(article.title(), "Categoria:Regioni senza Citylist o Destinationlist"):
                 bot.add_category(bot.current_page, "Regioni senza Citylist o Destinationlist")
+                sleep(10)
         bot.set_current_page(None)
     # Dump a list of these articles to a file
     bot.write_log_line(f"Articles of type {target} without Citylist or Destinationlist templates:", LOG_FILE_PATH)

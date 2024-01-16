@@ -75,5 +75,5 @@ class WikiBot:
 
     def add_category(self, page_name, category_name):
         page = pywikibot.Page(self.site, title=page_name)
-        page.text = page.text + f"\n[[Category:{category_name}]]"
-        page.save(f"Added category {category_name}",minor=True, botflag=True)
+        page.text = page.text + f"\n[[Categoria:{category_name}]]"
+        page.save(f"Aggiungo categoria {category_name}",minor=True, botflag=True, watch="nochange")
