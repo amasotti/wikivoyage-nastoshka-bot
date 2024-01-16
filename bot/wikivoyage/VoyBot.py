@@ -47,9 +47,9 @@ class WikivoyageBot(WikiBot):
             # Conditions
             is_target_template = (template.name == CITY_TEMPLATE_ITEM_NAME
                                   or template.name == DESTINATION_TEMPLATE_ITEM_NAME)
-            has_wikidata = template.has("wikidata")
+            has_not_wikidata = not template.has("wikidata") or (template.has("wikidata") and template.get("wikidata").value.strip() == "")
 
-            if is_target_template and not has_wikidata:
+            if is_target_template and has_not_wikidata:
                 name = template.get("nome").value.strip()
                 try:
                     alt = template.get("alt").value.strip()

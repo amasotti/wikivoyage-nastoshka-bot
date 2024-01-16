@@ -16,6 +16,10 @@ def categorize_region_without_destinations(target="Stato"):
     for i, article in enumerate(articles, start=1):
         print(f"Processing article {i} of {len(articles)}")
         bot.set_current_page(article.title())
+
+        if bot.current_page in EXCEPTIONS or "Atollo" in bot.current_page:
+            continue
+
         has_citylist, has_destinationlist = _check_relevant_templates(bot, article)
 
         if not has_citylist and not has_destinationlist:
@@ -60,3 +64,14 @@ def _check_relevant_templates(bot, article):
             has_destinationlist = True
             break
     return has_citylist, has_destinationlist
+
+
+EXCEPTIONS = [
+    "Gibilterra",
+    "Isola dei leoni marini",
+    "Nananu i Ra",
+    "New Island",
+    "Razzoli",
+    "Salt Cay",
+    "Territori insulari",
+]

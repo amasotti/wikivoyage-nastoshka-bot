@@ -18,11 +18,11 @@ def citylist_wikidata_check(lang="it", total=1):
 
     # Read the text of the article
     for article in articles:
-        wikivoyage_bot.set_current_page(article.title())
-        pywikibot.logging.stdout(f"Checking article: {article.title()}")
+        wikivoyage_bot.set_current_page("Sassonia-Anhalt")
+        pywikibot.logging.stdout(f"Checking article: {wikivoyage_bot.current_page}")
 
         # Get and parse the page wikicode
-        updated_wikitext = wikivoyage_bot.get_page_text(article.title())
+        updated_wikitext = wikivoyage_bot.get_page_text(wikivoyage_bot.current_page)
         wikicode = mwparserfromhell.parse(updated_wikitext)
 
         # Extract the templates from the page
@@ -32,7 +32,7 @@ def citylist_wikidata_check(lang="it", total=1):
         wikivoyage_bot.process_wikidata_in_citylist(templates)
 
         # Save the page
-        page = wikivoyage_bot.get_page(article.title())
+        page = wikivoyage_bot.get_page(wikivoyage_bot.current_page)
         updated_wikitext = str(wikicode)
         page.text = updated_wikitext
         page.save(f"Aggiungo wikidata ids ai template citylist e destinationlist di {article.title()}",
