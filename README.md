@@ -4,8 +4,7 @@ Small Python utility based on `pywikibot` for routine tasks on [Wikivoyage](http
 
 
 ## Features
-At moment the only feature I'm working on is the `citylist` template updater.
-
+Here a list of the available scripts:
 - `citylist template updater`: check the usages of `{{citylist}}` template with missing `wikidata` param, 
 retrieve the missing data from Wikidata and update the page.
 - `empty-da-sapere`: check the pages with empty "Da sapere" section and lists these pages in a report logfile.

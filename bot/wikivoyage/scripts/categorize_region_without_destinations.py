@@ -14,6 +14,7 @@ def categorize_region_without_destinations(target="Stato"):
 
     for i, article in enumerate(articles, start=1):
         print(f"Processing article {i} of {len(articles)}")
+        bot.set_current_page(article.title())
         has_citylist, has_destinationlist = _check_relevant_templates(bot, article)
 
         if not has_citylist and not has_destinationlist:
@@ -21,7 +22,7 @@ def categorize_region_without_destinations(target="Stato"):
             to_be_categorized.append(article.title())
             if not bot.is_in_category(article.title(), "Categoria:Regioni senza Citylist o Destinationlist"):
                 bot.add_category(bot.current_page, "Regioni senza Citylist o Destinationlist")
-
+        bot.set_current_page(None)
     # Dump a list of these articles to a file
     bot.write_log_line(f"Articles of type {target} without Citylist or Destinationlist templates:", LOG_FILE_PATH)
     bot.write_log_line(
@@ -40,8 +41,6 @@ def _check_relevant_templates(bot, article):
     :return: A tuple indicating whether the article has Citylist template and Destinationlist template respectively.
     :rtype: tuple
     """
-    bot.set_current_page(article.title())
-
     citylist = bot.get_template("Citylist")
     destinationlist = bot.get_template("Destinationlist")
 
@@ -58,5 +57,4 @@ def _check_relevant_templates(bot, article):
         if template_page == destinationlist:
             has_destinationlist = True
             break
-    bot.set_current_page(None)
     return has_citylist, has_destinationlist
