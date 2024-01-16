@@ -13,6 +13,7 @@ retrieve the missing data from Wikidata and update the page.
 different params is cumbersome. This script needs (to be improved and...) two additional params:
     - `--target-page`: the page where the template is located and where the sorting will be applied
     - `--target-template`: the name of the template to be sorted
+- `fix-empty-dynamicMap`: Checks the articles in the cat `Mappa dinamica senza coordinate` and tries to fix them
 
 ### Utilities
 *because I'm lazy...*
@@ -33,6 +34,7 @@ in a listing template. This script needs (to be improved and...) two additional 
    - `python main.py -s empty-da-sapere` for the empty "Da sapere" section checker
    - `python main.py -s sort-template --target-page "Alpi sveve" --target-template Citylist`
    - `python main.py -s get-coordinates --target-entity Q1969097`
+   - `python main.py -s fix-empty-dynamicMap -t 1`
 
 ## License
 see [LICENSE](LICENSE) file

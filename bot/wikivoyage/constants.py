@@ -1,2 +1,3 @@
 DESTINATION_TEMPLATE_ITEM_NAME = "Destinazione"
 CITY_TEMPLATE_ITEM_NAME = "Città"
+DYNAMIC_MAP_TEMPLATE = "MappaDinamica\n" # Peculiar case

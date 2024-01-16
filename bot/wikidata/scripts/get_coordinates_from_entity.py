@@ -9,7 +9,7 @@ def get_decimal_coords_from_wd_entity(entity:str, target_format:str):
     coords = wd_bot.get_lat_long(entity)
 
     if target_format == "wikivoyage":
-        return f"| lat= {coords[0]} | long = {coords[1]}"
+        return f"| lat= {coords[0]} | long = {coords[1]} | wikidata = {entity}"
     else:
         return coords
 

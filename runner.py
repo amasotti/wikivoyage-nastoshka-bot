@@ -1,4 +1,4 @@
-from bot.wikivoyage import citylist_wikidata_check, list_empty_daSapere, sort_template_params
+from bot.wikivoyage import citylist_wikidata_check, list_empty_daSapere, sort_template_params,check_coords_dynamic_maps
 from bot.wikidata import get_decimal_coords_from_wd_entity
 
 def check_and_run_citylist_checker(args):
@@ -46,12 +46,24 @@ def check_and_run_get_coordinates(args):
     coords = get_decimal_coords_from_wd_entity(args.target_entity, "wikivoyage")
     print(coords)
 
+def check_and_run_fix_empty_dynamicMap(args):
+    """
+    :param args: The command line arguments passed to the method.
+    :return: None
+
+    This method checks if the necessary template parameters are specified in the command
+    line arguments and calls the sort_template_params method accordingly.
+    """
+    check_coords_dynamic_maps(args.lang, args.total)
+
+
 
 SCRIPT_DISPATCH_TABLE = {
     "citylist-checker": check_and_run_citylist_checker,
     "empty-da-sapere": check_and_run_empty_da_sapere,
     "sort-template": check_and_run_sort_template,
     "get-coordinates": check_and_run_get_coordinates,
+    "fix-empty-dynamicMap": check_and_run_fix_empty_dynamicMap,
 }
 
 
