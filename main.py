@@ -12,5 +12,6 @@ if __name__ == "__main__":
     parser.add_argument('-t', '--total', help='The total number of articles to check', required=False, default=1)
     parser.add_argument('--target-page', help='The target page for the script', required=False, default=None)
     parser.add_argument('--target-template', help='The name of the template to sort', required=False, default=None)
+    parser.add_argument('-d', '--target-entity', help='The wikidata entity to process', required=False, default=None)
     args = parser.parse_args()
     run(args)

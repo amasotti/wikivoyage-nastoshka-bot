@@ -1,5 +1,5 @@
 from bot.wikivoyage import citylist_wikidata_check, list_empty_daSapere, sort_template_params
-
+from bot.wikidata import get_decimal_coords_from_wd_entity
 
 def check_and_run_citylist_checker(args):
     """
@@ -34,11 +34,24 @@ def check_and_run_sort_template(args):
     check_template_specified(args)
     sort_template_params(args.target_page, args.target_template, args.lang)
 
+def check_and_run_get_coordinates(args):
+    """
+    :param args: The command line arguments passed to the method.
+    :return: None
+
+    This method checks if the necessary template parameters are specified in the command
+    line arguments and calls the sort_template_params method accordingly.
+    """
+    check_target_specified(args)
+    coords = get_decimal_coords_from_wd_entity(args.target_entity, "wikivoyage")
+    print(coords)
+
 
 SCRIPT_DISPATCH_TABLE = {
     "citylist-checker": check_and_run_citylist_checker,
     "empty-da-sapere": check_and_run_empty_da_sapere,
     "sort-template": check_and_run_sort_template,
+    "get-coordinates": check_and_run_get_coordinates,
 }
 
 
@@ -61,3 +74,13 @@ def check_template_specified(args):
     """
     if args.target_page is None or args.target_template is None:
         raise ValueError("You must specify both --target-page and --target-template")
+
+def check_target_specified(args):
+    """
+    Checks if both `--target-page` and `--target-template` were specified.
+    :param args: The command line arguments object.
+    :type args: object
+    :raises ValueError: If either `--target-page` or `--target-template` is not specified.
+    """
+    if args.target_entity is None:
+        raise ValueError("You must specify --target-entity")

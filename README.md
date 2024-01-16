@@ -14,6 +14,14 @@ different params is cumbersome. This script needs (to be improved and...) two ad
     - `--target-page`: the page where the template is located and where the sorting will be applied
     - `--target-template`: the name of the template to be sorted
 
+### Utilities
+*because I'm lazy...*
+
+- `get-coordinates`: Retrieves the coordinates of a place from Wikidata and prints them in a format ready to be pasted
+in a listing template. This script needs (to be improved and...) two additional params:
+    - `--target-entity`: the name of the entity to be searched on Wikidata (e.g. Q123456)
+
+
 ## Usage
 
 1. Clone the repo
@@ -23,6 +31,8 @@ different params is cumbersome. This script needs (to be improved and...) two ad
 4. Run the script 
    - `python main.py -s citylist-checker -t 2` for the `citylist` template updater
    - `python main.py -s empty-da-sapere` for the empty "Da sapere" section checker
+   - `python main.py -s sort-template --target-page "Alpi sveve" --target-template Citylist`
+   - `python main.py -s get-coordinates --target-entity Q1969097`
 
 ## License
 see [LICENSE](LICENSE) file
