@@ -72,3 +72,6 @@ def is_section_empty(section_text):
     text_without_spacing = text_without_spacing.replace('\n', '')
     # Check if there's any content left
     return not text_without_spacing.strip()
+
+def has_template(page, template):
+    return template in page.templates()

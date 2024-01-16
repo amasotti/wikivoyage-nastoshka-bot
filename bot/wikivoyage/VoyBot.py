@@ -131,7 +131,6 @@ class WikivoyageBot(WikiBot):
         for template in templates:
             # Conditions (We iterate a category that is supposed to contain only dynamic maps without coordinates)
             if template.name == DYNAMIC_MAP_TEMPLATE:
-                print(template)
                 page = self.get_page(self.current_page)
                 wikidata_id = page.data_item()
                 pywikibot.logging.info(f"Found wikidata item for {self.current_page}: {wikidata_id.title()}")
@@ -139,6 +138,10 @@ class WikivoyageBot(WikiBot):
 
                 if coords[0] is None:
                     pywikibot.logging.stdout(f"\tCould not find coordinates for {self.current_page} -- keeping empty")
+                    self.write_log_line(
+                        f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} {self.current_page} -- No coordinates updated",
+                        file="logs/dynamic_map_log.log"
+                    )
                 else:
                     pywikibot.logging.stdout(f"\tFound coordinates for {self.current_page}: {coords}")
                     template.add("Lat", str(" " + coords[0]), before="h", preserve_spacing=True)
@@ -148,14 +151,14 @@ class WikivoyageBot(WikiBot):
                     if self.is_in_category(self.current_page,"Categoria:Città"):
                         template.add("z", "12", preserve_spacing=True)
                     elif self.is_in_category(self.current_page,"Categoria:Regione"):
-                        template.add("z", "8", preserve_spacing=True)
+                        template.add("z", "6", preserve_spacing=True)
                     elif self.is_in_category(self.current_page,"Categoria:Distretto"):
                         template.add("z", "10", preserve_spacing=True)
                     elif self.is_in_category(self.current_page,"Categoria:Parco") or self.is_in_category(self.current_page,"Categoria:Sito archeologico"):
                         template.add("z", "10", preserve_spacing=True)
 
                     self.write_log_line(
-                        f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} {self.current_page} -- Added coordinates\n",
+                        f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} {self.current_page} -- Added coordinates",
                         file="logs/dynamic_map_log.log"
                     )
         return templates

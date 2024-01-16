@@ -22,7 +22,7 @@ def sort_template_params(page_name: str, template_name: str, lang: str = "it"):
 
     # Save the page
     article.text = str(wikicode)
-    article.save(f"Ordino alfabeticamente i parametri del template {template_name} di {page_name} [NastoshkaBot]",
+    article.save(f"Ordino alfabeticamente i parametri del template {template_name} di {page_name}",
                 watch='watch',
                 minor=True,
                 )

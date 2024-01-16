@@ -4,8 +4,7 @@ from runner import run
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         description='Run the wikivoyage Nastoshka bot',
-        usage='main.py -s <script> [-l <lang> -t <total>]\navailable scripts:\n' +
-              '\tcitylist-checker : Check the citylist for wikidata ids'
+        usage='main.py -s <script> [-l <lang> -t <total> --target-page <page> --target-template <template> --target-entity <entity> --target-category <category>]'
     )
     parser.add_argument('-s', '--script', help='Run a specific script', required=False)
     parser.add_argument('-l', '--lang', help='The language to use', required=False, default='it')
@@ -13,5 +12,6 @@ if __name__ == "__main__":
     parser.add_argument('--target-page', help='The target page for the script', required=False, default=None)
     parser.add_argument('--target-template', help='The name of the template to sort', required=False, default=None)
     parser.add_argument('-d', '--target-entity', help='The wikidata entity to process', required=False, default=None)
+    parser.add_argument('-c', '--target-category', help='The category to process', required=False, default=None)
     args = parser.parse_args()
     run(args)

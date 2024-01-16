@@ -29,8 +29,10 @@ def check_coords_dynamic_maps(lang="it", total=1):
         updated_wikitext = str(wikicode)
 
         page.text = updated_wikitext
-        print(f"Saving page {bot.current_page}")
-        page.save(f"Aggiungo le coordinate alla mappa dinamica di {bot.current_page} [NastoshkaBot]",
-                  watch='watch',
+        pywikibot.logging.info(f"Saving page {bot.current_page}")
+        pywikibot.logging.info("-".join(["-"] * 20))
+        #pywikibot.showDiff(text, updated_wikitext)
+        page.save(f"Aggiungo le coordinate alla mappa dinamica di {bot.current_page}",
+                  watch='nochange',
                   minor=True,
                   )

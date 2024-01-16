@@ -25,6 +25,15 @@ class WikiBot:
         """
         return pywikibot.Page(self.site, title=page_name, ns=ns)
 
+    def get_template(self, template_name, ns=10) -> pywikibot.Page:
+        """
+        Get a pywikibot.Page object
+        :param template_name: str template name
+        :param ns: int namespace, defaults to 10 (template)
+        :return: pywikibot.Page object
+        """
+        return pywikibot.Page(self.site, title=template_name, ns=ns)
+
     def get_page_templates(self, p_name, namespace=0):
         """
         Get the templates used in a page
@@ -63,3 +72,8 @@ class WikiBot:
     def parse_nested_template(self, wikitext, template_name):
         parsed_data = textlib.extract_templates_and_params(wikitext, True, True)
         return [x for x in parsed_data if x[0] == template_name]
+
+    def add_category(self, page_name, category_name):
+        page = pywikibot.Page(self.site, title=page_name)
+        page.text = page.text + f"\n[[Category:{category_name}]]"
+        page.save(f"Added category {category_name}",minor=True, botflag=True)
