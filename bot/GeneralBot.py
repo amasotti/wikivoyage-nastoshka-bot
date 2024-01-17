@@ -12,8 +12,7 @@ class WikiBot:
         :param namespace: int, namespace, defaults to 0 (main)
         :return: raw wiki text
         """
-        page = pywikibot.Page(self.site, title=p_name, ns=namespace)
-        page.templates()
+        page = self.get_page(p_name,ns=namespace)
         return page.text
 
     def get_page(self, page_name, ns=0) -> pywikibot.Page:

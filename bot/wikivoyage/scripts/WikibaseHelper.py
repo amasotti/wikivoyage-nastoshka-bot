@@ -4,10 +4,11 @@ import re
 import pywikibot
 from pywikibot.pagegenerators import WikidataSPARQLPageGenerator
 
-from bot.wikidata.constants import *
+IS_INSTANCE_OF = 'P31'
+IS_DISAMBIGUATION = 'Q4167410'
+COORDINATES = 'P625'
 
-# deprecated - moving scripts to standalone pywikibot scripts
-class WikidataBot:
+class WikibaseHelper:
     def __init__(self):
         self.site = pywikibot.Site().data_repository()
 
@@ -26,7 +27,8 @@ class WikidataBot:
                     return True
         return False
 
-    def _truncate_coordinates(self, coords):
+    @staticmethod
+    def _truncate_coordinates(coords):
         return tuple(format(x, '.6g') for x in coords)
 
     def get_lat_long(self, wikidata_item):

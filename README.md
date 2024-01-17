@@ -40,6 +40,31 @@ in a listing template. This script needs (to be improved and...) two additional 
    - `python main.py -s fix-empty-dynamicMap -t 1`
    - `python main.py -s categorize-region-without-destinations --target-category "Stato"`
 
+## Scripts - WIP
+
+I'm currently refactoring the scripts in standard pywikibot scripts
+
+- [Itemlist Wikidata Completer](bot/wikivoyage/scripts/ItemlistWikidataCompleter.md) - script to fill the params `wikidata`, `lat`, `long` in Itemlist that lack them
+
+
+To start the scripts in this way, add this line to your `user-config.py`:
+
+```python
+user_script_paths=["bot/wikivoyage/scripts"] # or the path where you cloned the script
+```
+
+Then run as a normal pywikibot script:
+
+```bash
+pwb <script-name> <options>
+```
+
+## Useful resources
+
+- [Pywikibot sample script](https://doc.wikimedia.org/pywikibot/stable/library_usage.html)
+- [Generator Parameters](https://doc.wikimedia.org/pywikibot/stable/api_ref/pywikibot.pagegenerators.html#generator-options)
+- [Global Parameters](https://doc.wikimedia.org/pywikibot/stable/global_options.html)
+
 ## License
 see [LICENSE](LICENSE) file
 
