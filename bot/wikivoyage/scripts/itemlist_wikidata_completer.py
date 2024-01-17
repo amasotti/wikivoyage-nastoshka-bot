@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, Iterable
 
 import mwparserfromhell
 import pywikibot
@@ -78,9 +78,12 @@ class ItemListWikidataCompleter(ExistingPageBot):
 
         # Save the page
         content = str(wikicode)
-        pywikibot.showDiff(content, self.current_page.text)
-        self.current_page.text = content
-        self.current_page.save(**self.edit_opts)
+        if content != self.current_page.text:
+            pywikibot.showDiff(content, self.current_page.text)
+            self.current_page.text = content
+            self.current_page.save(**self.edit_opts)
+        else:
+            self.skip_page(self.current_page)
 
     def process_templates(self, templates):
         """
@@ -164,7 +167,7 @@ def handle_opts() -> list[str]:
     return args
 
 
-def setup_generator(local_args: list[str]) -> tuple[pagegenerators.GeneratorFactory, dict[str, Any]]:
+def setup_generator(local_args: list[str]) -> tuple[Iterable | None, dict[str, Any]]:
     options = {}
     genFactory = pagegenerators.GeneratorFactory()
     for arg in genFactory.handle_args(local_args):

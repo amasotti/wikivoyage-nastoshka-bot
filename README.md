@@ -32,7 +32,7 @@ in a listing template. This script needs (to be improved and...) two additional 
 1. Install [pywikibot](https://www.mediawiki.org/wiki/Manual:Pywikibot/Installation#Install_Pywikibot)
 2. Generate a user-config.py file with `pwb generate_user_files`
 3. Login with `pwb login`
-4. Run the script 
+4. Run the script (*but see below under "Scripts" for more details*):
    - `python main.py -s citylist-checker -t 2` for the `citylist` template updater
    - `python main.py -s empty-da-sapere` for the empty "Da sapere" section checker
    - `python main.py -s sort-template --target-page "Alpi sveve" --target-template Citylist`
@@ -40,7 +40,7 @@ in a listing template. This script needs (to be improved and...) two additional 
    - `python main.py -s fix-empty-dynamicMap -t 1`
    - `python main.py -s categorize-region-without-destinations --target-category "Stato"`
 
-## Scripts - WIP
+## Scripts
 
 I'm currently refactoring the scripts in standard pywikibot scripts
 
