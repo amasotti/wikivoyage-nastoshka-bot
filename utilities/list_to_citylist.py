@@ -6,7 +6,7 @@ def transform_wikimedia_list(file_path):
         input_text = file.read()
 
     # Regular expression to match island names and descriptions
-    regex = r"\*\s*'''(?:\[?\[?([^|\]]+)\|)?([^\]]+)\]?\]?'''(?:\s*-\s*(.*?))?(?:\s*\n|$)"
+    regex = r"\*\s*'?'?'?(?:\[?\[?([^|\]]+)\|)?([^\]]+)\]?\]?'?'?'?(?:\s*-\s*(.*?))?(?:\s*\n|$)"
 
     # Find all matches
     matches = re.findall(regex, input_text)
@@ -32,7 +32,7 @@ def check_if_already_wikilink(text):
     :return: True if the text is already a wikilink, False otherwise.
     :rtype: bool
     """
-    return text.startswith("[[") and text.endswith("]]"
+    return text.startswith("[[") and text.endswith("]]")
 
 # File paths
 input_file_path = 'output/raw.txt'  # Replace with your input file path

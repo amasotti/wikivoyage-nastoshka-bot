@@ -18,7 +18,8 @@ def citylist_wikidata_check(lang="it", total=1):
 
     # Read the text of the article
     for article in articles:
-        voy_bot.set_current_page(voy_bot.current_page)
+        voy_bot.set_current_page(article.title())
+        #voy_bot.set_current_page("Provincia di Como")
         pywikibot.logging.stdout(f"Checking article: {voy_bot.current_page}")
 
         # Get and parse the page wikicode
@@ -35,8 +36,8 @@ def citylist_wikidata_check(lang="it", total=1):
         page = voy_bot.get_page(voy_bot.current_page)
         updated_wikitext = str(wikicode)
         page.text = updated_wikitext
-        page.save(f"Aggiungo wikidata ids ai template citylist e destinationlist di {article.title()}",
-                  watch='watch',
+        page.save(f"Aggiungo wikidata ids ai template citylist e destinationlist",
+                  watch='nochange',
                   minor=True,
                   )
         # Log the operation
