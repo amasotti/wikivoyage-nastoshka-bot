@@ -43,21 +43,6 @@ class WikiBot:
         page = pywikibot.Page(self.site, title=p_name, ns=namespace)
         return page.templatesWithParams()
 
-    def get_template_usage(self, template_name, total=3, namespace=0):
-        """
-        Given a template name, get the pages that use it by embedding it
-        :param template_name: str, template name
-        :param total: int, total number of pages to return, defaults to 3
-        :param namespace:  int, namespace, defaults to 0 (main)
-        :return: list of pages
-        """
-        template_page = pywikibot.Page(self.site, title=template_name, ns=10)
-        linked_pages = template_page.getReferences(
-            namespaces=namespace,
-            total=total,
-            only_template_inclusion=True)
-        return list(linked_pages)
-
     def listify_category(self, cat_name, total=4):
         """
         Given a category name, get the pages that are in it

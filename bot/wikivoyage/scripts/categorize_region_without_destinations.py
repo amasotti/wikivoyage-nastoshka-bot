@@ -30,8 +30,8 @@ def categorize_region_without_destinations(target="Stato"):
                 sleep(10)
         bot.set_current_page(None)
     # Dump a list of these articles to a file
-    bot.write_log_line(f"Articles of type {target} without Citylist or Destinationlist templates:", LOG_FILE_PATH)
-    bot.write_log_line(
+    write_log_line(f"Articles of type {target} without Citylist or Destinationlist templates:", LOG_FILE_PATH)
+    write_log_line(
         '\n'.join([f"* [[{article}]]" for article in to_be_categorized]),
         LOG_FILE_PATH, with_timestamp=False)
 

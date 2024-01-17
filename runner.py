@@ -5,18 +5,6 @@ from bot.wikivoyage.scripts import *  # WIKIVOYAGE SCRIPTS
 
 # --------------------  RUNNERS -------------------- #
 
-def check_and_run_citylist_checker(args):
-    """
-    :param args: a dictionary containing the following information:
-        - lang: a string representing the language code
-        - total: an integer representing the total number of cities to check
-    :return: None
-
-    This method checks and runs the citylist_checker for the specified language and total number of cities.
-    """
-    citylist_wikidata_check(args.lang, int(args.total))
-
-
 def check_and_run_empty_da_sapere(args):
     """
     Check and run the empty_da_sapere function.
@@ -78,7 +66,6 @@ def check_and_run_categorization_no_destinations(args):
 # --------------------  SCRIPT DISPATCH TABLE -------------------- #
 
 SCRIPT_DISPATCH_TABLE = {
-    "citylist-checker": check_and_run_citylist_checker,
     "empty-da-sapere": check_and_run_empty_da_sapere,
     "sort-template": check_and_run_sort_template,
     "get-coordinates": check_and_run_get_coordinates,

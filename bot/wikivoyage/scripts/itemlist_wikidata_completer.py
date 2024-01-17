@@ -6,6 +6,7 @@ from pywikibot import pagegenerators
 from pywikibot.bot import ExistingPageBot
 from WikibaseHelper import WikibaseHelper
 
+# --- it.wikivoyage specific constants ---
 DESTINATION_TEMPLATE_ITEM_NAME = "Destinazione"
 CITY_TEMPLATE_ITEM_NAME = "Città"
 TARGET_CATEGORY = "Itemlist_con_errori_di_compilazione"
@@ -16,14 +17,47 @@ LAT_PARAM_NAME = "lat"
 LON_PARAM_NAME = "long"
 DESCRIPTION_PARAM_NAME = "descrizione"
 
-class ItemListWikidataCompleter(ExistingPageBot):
 
+class ItemListWikidataCompleter(ExistingPageBot):
+    """
+    ``ItemListWikidataCompleter``
+
+    Class that extends ``ExistingPageBot`` and is used to complete itemlists with
+    wikidata codes.
+
+    Attributes:
+        - ``wikibase_helper``: Instance of class ``WikibaseHelper``.
+
+    Methods:
+        - ``__init__``: Constructs a new ``ItemListWikidataCompleter`` object.
+        - ``edit_opts``: Returns options for editing the page.
+        - ``treat_page``: Processes a page by extracting templates, adding wikidata ids and saving the page.
+        - ``process_templates``: Processes templates by checking if they are target templates and adding wikidata ids if missing.
+        - ``_process_coordinates``: Adds coordinates to the template if they exist.
+        - ``_process_wikidata``: Adds the wikidata id to the template if it exists.
+
+    Example usage:
+
+    ```python
+    completer = ItemListWikidataCompleter()
+    completer.run()
+    ```
+    """
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.wikibase_helper = WikibaseHelper()
 
     @property
     def edit_opts(self):
+        """
+        :return: A dictionary containing options for editing.
+                 The dictionary has the following keys:
+                 - "summary": A string representing the summary for the edit.
+                 - "watch": A string indicating whether to watch the page for changes.
+                            Possible values are "watch", "unwatch" (default: "nochange").
+                 - "minor": A boolean indicating whether the edit should be marked as minor (default: True).
+                 - "botflag": A boolean indicating whether the edit should be flagged as a bot edit (default: True).
+        """
         return {
             "summary": f"Completo itemlists con codici wikidata",
             "watch": "nochange",
@@ -42,7 +76,6 @@ class ItemListWikidataCompleter(ExistingPageBot):
         # Add wikidata ids to the templates if they are missing and can be found
         self.process_templates(templates)
 
-
         # Save the page
         content = str(wikicode)
         pywikibot.showDiff(content, self.current_page.text)
@@ -50,12 +83,19 @@ class ItemListWikidataCompleter(ExistingPageBot):
         self.current_page.save(**self.edit_opts)
 
     def process_templates(self, templates):
+        """
+        Processes templates to update the data and add additional information.
+
+        :param templates: List of templates to process.
+        :type templates: list
+        :return: None
+        """
         for template in templates:
             # Conditions
             is_target_template = (template.name == CITY_TEMPLATE_ITEM_NAME
                                   or template.name == DESTINATION_TEMPLATE_ITEM_NAME)
             has_not_wikidata = not template.has(WIKIDATA_PARAM_NAME) or (
-                        template.has(WIKIDATA_PARAM_NAME) and template.get(WIKIDATA_PARAM_NAME).value.strip() == "")
+                    template.has(WIKIDATA_PARAM_NAME) and template.get(WIKIDATA_PARAM_NAME).value.strip() == "")
 
             if is_target_template and has_not_wikidata:
                 name_label = template.get(NAME_PARAM_NAME).value.strip()
@@ -106,6 +146,11 @@ class ItemListWikidataCompleter(ExistingPageBot):
 
 
 def handle_opts() -> list[str]:
+    """
+    Handles the command line options for the program.
+
+    :return: A list of command line arguments.
+    """
     args = pywikibot.handle_args()
 
     # set default cat
@@ -138,6 +183,7 @@ def main():
     generator, options = setup_generator(local_args)
     bot = ItemListWikidataCompleter(generator=generator, **options)
     bot.run()
+
 
 if __name__ == '__main__':
     main()

@@ -4,9 +4,11 @@ import re
 import pywikibot
 from pywikibot.pagegenerators import WikidataSPARQLPageGenerator
 
+# --- Wikidata properties ---
 IS_INSTANCE_OF = 'P31'
 IS_DISAMBIGUATION = 'Q4167410'
 COORDINATES = 'P625'
+
 
 class WikibaseHelper:
     def __init__(self):
