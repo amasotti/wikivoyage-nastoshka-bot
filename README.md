@@ -25,6 +25,11 @@ that lack a list of cities or destinations, despite of referring to larger entit
 - [DynamicMap Filler](bot/wikivoyage/scripts/DynamicMapFiller.md) - script to fill the `dynamicmap` lat and long parameter in articles that lack it
 
 
+### Utilities
+
+- [Wikivoyage coordinates getter](bot/wikidata/scripts/GetCoordinatesForWikivoyage.md) - script to get the coordinates for a given Wikidata item
+in wikivoyage listing format (lat=, long=, wikidata=)
+
 ### Start as a pywikibot script
 
 To start the scripts in this way, add this line to your `user-config.py`:
