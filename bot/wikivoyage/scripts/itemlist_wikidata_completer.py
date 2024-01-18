@@ -9,7 +9,7 @@ from pwb_aux import setup_generator
 # --- it.wikivoyage specific constants ---
 DESTINATION_TEMPLATE_ITEM_NAME = "Destinazione"
 CITY_TEMPLATE_ITEM_NAME = "Città"
-TARGET_CATEGORY = "Itemlist_con_errori_di_compilazione"
+SOURCE_CATEGORY = "Itemlist_con_errori_di_compilazione"
 WIKIDATA_PARAM_NAME = "wikidata"
 NAME_PARAM_NAME = "nome"
 ALT_PARAM_NAME = "alt"
@@ -159,7 +159,7 @@ def prepare_generator_args() -> list[str]:
 
     # set default cat
     if not any(arg.startswith("-cat") for arg in args):
-        args.append(f"-catr:{TARGET_CATEGORY}")
+        args.append(f"-catr:{SOURCE_CATEGORY}")
 
     return args
 
