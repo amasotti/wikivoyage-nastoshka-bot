@@ -21,8 +21,3 @@ def check_target_entity_specified(args):
     """
     if args.target_entity is None:
         raise ValueError("You must specify --target-entity")
-
-
-def check_target_category_specified(args):
-    if args.target_category is None:
-        raise ValueError("You must specify --target-category")

@@ -17,10 +17,6 @@ different params is cumbersome. This script needs (to be improved and...) two ad
     - `--target-page`: the page where the template is located and where the sorting will be applied
     - `--target-template`: the name of the template to be sorted
 - `fix-empty-dynamicMap`: Checks the articles in the cat `Mappa dinamica senza coordinate` and tries to fix them
-- `categorize-region-without-destinations`: Categorizes the articles without a list of destinations, bespite of refering 
-to larger entities (states, Regions) in the service cat [Regioni senza Citylist o Destinationlist](https://it.wikivoyage.org/wiki/Categoria:Regioni_senza_Citylist_o_Destinationlist). 
-It requires two additional params:
-    - `--target-category`: the name of the category to be checked (e.g. "Stato")
 
 ### Utilities
 *because I'm lazy...*
@@ -40,7 +36,6 @@ in a listing template. This script needs (to be improved and...) two additional 
    - `python main.py -s sort-template --target-page "Alpi sveve" --target-template Citylist`
    - `python main.py -s get-coordinates --target-entity Q1969097`
    - `python main.py -s fix-empty-dynamicMap -t 1`
-   - `python main.py -s categorize-region-without-destinations --target-category "Stato"`
 
 ## Scripts
 
