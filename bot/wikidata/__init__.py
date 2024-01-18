@@ -1,1 +1,0 @@
-from .WikidataBot import WikidataBot

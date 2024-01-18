@@ -7,36 +7,23 @@ It's based on
 - Python v. `3.10`
 - Pywikibot v. `8.6.0` (current stable release: [docs](https://doc.wikimedia.org/pywikibot/stable/))
 
-## Features
-
-see below [#scripts](#scripts) for an improved version of the scripts. 
-
-Here a list of the available scripts:
-- `sort-template`: sort the params of a template in a page. Useful for `{{Citylist}}` template, where moving the
-different params is cumbersome. This script needs (to be improved and...) two additional params:
-    - `--target-page`: the page where the template is located and where the sorting will be applied
-    - `--target-template`: the name of the template to be sorted
-- `fix-empty-dynamicMap`: Checks the articles in the cat `Mappa dinamica senza coordinate` and tries to fix them
-
 ## Usage
 
 1. Clone the repo
 1. Install [pywikibot](https://www.mediawiki.org/wiki/Manual:Pywikibot/Installation#Install_Pywikibot)
 2. Generate a user-config.py file with `pwb generate_user_files`
 3. Login with `pwb login`
-4. Run the script (*but see below under "Scripts" for more details*):
-   - `python main.py -s sort-template --target-page "Alpi sveve" --target-template Citylist`
-   - `python main.py -s fix-empty-dynamicMap -t 1`
+4. Run the script (*see below under "Scripts" for more details*):
 
 ## Scripts
-
-I'm currently refactoring the scripts in standard pywikibot scripts
 
 - [Itemlist Wikidata Completer](bot/wikivoyage/scripts/ItemlistWikidataCompleter.md) - script to fill the params `wikidata`, `lat`, `long` in Itemlist (Città and Destinazione) that lack them
 - [Empty section finder](bot/wikivoyage/scripts/EmptySectionFinder.md) - script to find empty sections in articles given the 
 name of the category and of the section to be checked
 - [Missing Itemlist Finder](bot/wikivoyage/scripts/MissingItemlistFinder.md) - script to find articles from a given category (usually `Region` or `State`) 
 that lack a list of cities or destinations, despite of referring to larger entities (states, regions)
+- [DynamicMap Filler](bot/wikivoyage/scripts/DynamicMapFiller.md) - script to fill the `dynamicmap` lat and long parameter in articles that lack it
+
 
 ### Start as a pywikibot script
 
