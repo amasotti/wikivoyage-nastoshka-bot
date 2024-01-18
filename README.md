@@ -8,6 +8,9 @@ It's based on
 - Pywikibot v. `8.6.0` (current stable release: [docs](https://doc.wikimedia.org/pywikibot/stable/))
 
 ## Features
+
+see below [#scripts](#scripts) for an improved version of the scripts. 
+
 Here a list of the available scripts:
 - `sort-template`: sort the params of a template in a page. Useful for `{{Citylist}}` template, where moving the
 different params is cumbersome. This script needs (to be improved and...) two additional params:
