@@ -4,17 +4,6 @@ from bot.wikivoyage.scripts import *  # WIKIVOYAGE SCRIPTS
 
 
 # --------------------  RUNNERS -------------------- #
-
-def check_and_run_empty_da_sapere(args):
-    """
-    Check and run the empty_da_sapere function.
-
-    :param args: The arguments for the function.
-    :return: None
-    """
-    list_empty_daSapere(args.lang)
-
-
 def check_and_run_sort_template(args):
     """
     :param args: The command line arguments passed to the method.
@@ -66,7 +55,6 @@ def check_and_run_categorization_no_destinations(args):
 # --------------------  SCRIPT DISPATCH TABLE -------------------- #
 
 SCRIPT_DISPATCH_TABLE = {
-    "empty-da-sapere": check_and_run_empty_da_sapere,
     "sort-template": check_and_run_sort_template,
     "get-coordinates": check_and_run_get_coordinates,
     "fix-empty-dynamicMap": check_and_run_fix_empty_dynamicMap,
