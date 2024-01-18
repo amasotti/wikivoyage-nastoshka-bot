@@ -18,14 +18,6 @@ different params is cumbersome. This script needs (to be improved and...) two ad
     - `--target-template`: the name of the template to be sorted
 - `fix-empty-dynamicMap`: Checks the articles in the cat `Mappa dinamica senza coordinate` and tries to fix them
 
-### Utilities
-*because I'm lazy...*
-
-- `get-coordinates`: Retrieves the coordinates of a place from Wikidata and prints them in a format ready to be pasted
-in a listing template. This script needs (to be improved and...) two additional params:
-    - `--target-entity`: the name of the entity to be searched on Wikidata (e.g. Q123456)
-
-
 ## Usage
 
 1. Clone the repo
@@ -34,7 +26,6 @@ in a listing template. This script needs (to be improved and...) two additional 
 3. Login with `pwb login`
 4. Run the script (*but see below under "Scripts" for more details*):
    - `python main.py -s sort-template --target-page "Alpi sveve" --target-template Citylist`
-   - `python main.py -s get-coordinates --target-entity Q1969097`
    - `python main.py -s fix-empty-dynamicMap -t 1`
 
 ## Scripts

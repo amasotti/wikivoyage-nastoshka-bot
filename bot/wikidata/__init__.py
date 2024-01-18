@@ -1,2 +1,1 @@
 from .WikidataBot import WikidataBot
-from .scripts.get_coordinates_from_entity import get_decimal_coords_from_wd_entity
