@@ -2,11 +2,13 @@
 
 Small Python utility based on `pywikibot` for routine tasks on [Wikivoyage](https://it.wikivoyage.org/).
 
+It's based on 
+
+- Python v. `3.10`
+- Pywikibot v. `8.6.0` (current stable release: [docs](https://doc.wikimedia.org/pywikibot/stable/))
 
 ## Features
 Here a list of the available scripts:
-- `citylist template updater`: check the usages of `{{citylist}}` template with missing `wikidata` param, 
-retrieve the missing data from Wikidata and update the page.
 - `empty-da-sapere`: check the pages with empty "Da sapere" section and lists these pages in a report logfile.
 - `sort-template`: sort the params of a template in a page. Useful for `{{Citylist}}` template, where moving the
 different params is cumbersome. This script needs (to be improved and...) two additional params:
@@ -33,7 +35,6 @@ in a listing template. This script needs (to be improved and...) two additional 
 2. Generate a user-config.py file with `pwb generate_user_files`
 3. Login with `pwb login`
 4. Run the script (*but see below under "Scripts" for more details*):
-   - `python main.py -s citylist-checker -t 2` for the `citylist` template updater
    - `python main.py -s empty-da-sapere` for the empty "Da sapere" section checker
    - `python main.py -s sort-template --target-page "Alpi sveve" --target-template Citylist`
    - `python main.py -s get-coordinates --target-entity Q1969097`
@@ -44,8 +45,10 @@ in a listing template. This script needs (to be improved and...) two additional 
 
 I'm currently refactoring the scripts in standard pywikibot scripts
 
-- [Itemlist Wikidata Completer](bot/wikivoyage/scripts/ItemlistWikidataCompleter.md) - script to fill the params `wikidata`, `lat`, `long` in Itemlist that lack them
+- [Itemlist Wikidata Completer](bot/wikivoyage/scripts/ItemlistWikidataCompleter.md) - script to fill the params `wikidata`, `lat`, `long` in Itemlist (Città and Destinazione) that lack them
 
+
+### Start as a pywikibot script
 
 To start the scripts in this way, add this line to your `user-config.py`:
 

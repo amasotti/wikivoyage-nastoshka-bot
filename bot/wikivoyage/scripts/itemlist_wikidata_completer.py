@@ -2,9 +2,9 @@ from typing import Any, Iterable
 
 import mwparserfromhell
 import pywikibot
-from pywikibot import pagegenerators
 from pywikibot.bot import ExistingPageBot
 from WikibaseHelper import WikibaseHelper
+from pwb_aux import setup_generator
 
 # --- it.wikivoyage specific constants ---
 DESTINATION_TEMPLATE_ITEM_NAME = "Destinazione"
@@ -148,9 +148,10 @@ class ItemListWikidataCompleter(ExistingPageBot):
             template.add(WIKIDATA_PARAM_NAME, wikidata_id, before=DESCRIPTION_PARAM_NAME, preserve_spacing=True)
 
 
-def handle_opts() -> list[str]:
+def prepare_generator_args() -> list[str]:
     """
     Handles the command line options for the program.
+    The args are then passed to the generator
 
     :return: A list of command line arguments.
     """
@@ -160,29 +161,11 @@ def handle_opts() -> list[str]:
     if not any(arg.startswith("-cat") for arg in args):
         args.append(f"-catr:{TARGET_CATEGORY}")
 
-    # activate log
-    if not any(arg.startswith("-log") for arg in args):
-        args.append("-log")
-
     return args
 
 
-def setup_generator(local_args: list[str]) -> tuple[Iterable | None, dict[str, Any]]:
-    options = {}
-    genFactory = pagegenerators.GeneratorFactory()
-    for arg in genFactory.handle_args(local_args):
-        if arg.startswith('-'):
-            arg, sep, value = arg.partition(':')
-            if value != '':
-                options[arg[1:]] = value if not value.isdigit() else int(value)
-            else:
-                options[arg[1:]] = True
-    generator = genFactory.getCombinedGenerator()
-    return generator, options
-
-
 def main():
-    local_args = handle_opts()
+    local_args = prepare_generator_args()
     generator, options = setup_generator(local_args)
     bot = ItemListWikidataCompleter(generator=generator, **options)
     bot.run()
