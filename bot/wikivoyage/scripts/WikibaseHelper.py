@@ -81,7 +81,7 @@ class WikibaseHelper:
         return self.finalize_wikidata_item(wikidata_item, article_name)
 
     def try_entity_retrieval(self, article_name, lang):
-        item = self.run_query(article_name, lang)
+        item = self.run_query_for_label(article_name, lang)
         return item if item else None
 
     def finalize_wikidata_item(self, wikidata_item, article_name):
@@ -94,7 +94,20 @@ class WikibaseHelper:
         else:
             return wikidata_item
 
-    def run_query(self, entity_label, lang='it'):
+    def run_query(self, query) -> WikidataSPARQLPageGenerator:
+        """
+        Run a query on wikidata
+        :param query:
+        :return:
+        """
+        gen = WikidataSPARQLPageGenerator(
+            query,
+            site=self.site,
+            endpoint='https://query.wikidata.org/sparql'
+        )
+        return gen
+
+    def run_query_for_label(self, entity_label, lang='it', limit=1):
         """
         Get the Wikidata item for a city if a corresponding wp article in italian or english exists
         :param entity_label:
@@ -120,10 +133,31 @@ class WikibaseHelper:
         # (otherwise we have a problem)
         pages = list(gen)
 
-        if len(pages) != 1:
-            print(f"\tFound zero or multiple wikidata item for {entity_label} -- skipping")
-            return None
-        return pages[0].title()
+        if limit == 1:
+            if len(pages) != 1:
+                print(f"\tFound zero or multiple wikidata item for {entity_label} -- skipping")
+                return None
+            return pages[0].title()
+        else:
+            return [page.title() for page in pages]
+
+    def get_iso_3166_1_from_city(self, city_entity):
+        # Get the country of the city (P17)
+        country = self.get_country_from_city(city_entity)
+
+        # Get the iso 3166-1 code of the country (P297)
+        item = pywikibot.ItemPage(site=self.site, title=country)
+        item_dict = item.get()
+        claims = item_dict["claims"]
+        if "P297" in claims:
+            for claim in claims["P297"]:
+                return claim.getTarget().title()
+        elif "P300" in claims:
+            for claim in claims["P300"]:
+                return claim.getTarget().title()
+        return None
+
+
 
     def write_log_line(self, text, file="logs/citylist_log.log"):
         """
@@ -135,3 +169,16 @@ class WikibaseHelper:
         with open(file, 'a') as f:
             f.write(text)
             f.close()
+
+    def get_country_from_city(self, city_entity):
+        """
+        Get the country of a city
+        :param city_entity:
+        :return:
+        """
+        item_dict = city_entity.get()
+        claims = item_dict["claims"]
+        if "P17" in claims:
+            for claim in claims["P17"]:
+                return claim.getTarget().title()
+        return None
