@@ -75,7 +75,7 @@ class EmptySectionFinder(ExistingPageBot):
 
     def dump_findings(self):
         pywikibot.info(f"Found {len(self.found_matches)} matches")
-        with open("logs/empty_sections.txt", "w") as f:
+        with open(f"logs/empty_{self.section_name}.txt", "w") as f:
             timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
             f.write(f"Empty sections dump - {timestamp}\n")
@@ -89,8 +89,9 @@ class EmptySectionFinder(ExistingPageBot):
                 f.write(f"* [[{match}]] <small>(check eseguito il {timestamp})</small>\n")
 
     def add_category(self):
-        """
-        Adds the service category to the page, if not already present.
+        """Add a category to the current page if it's not already present.
+
+        :return: None
         """
 
         service_cat_fullname = f"Categoria:{self.service_cat}"
@@ -105,6 +106,14 @@ class EmptySectionFinder(ExistingPageBot):
 
     @staticmethod
     def is_section_empty(section_text):
+        """
+        Check if a section of text is empty.
+
+        :param section_text: The text of a section.
+        :type section_text: str
+        :return: True if the section is empty, False otherwise.
+        :rtype: bool
+        """
         # Remove comments
         text_without_comments = re.sub(r'<!--.*?-->', '', section_text,
                                        flags=re.DOTALL | re.MULTILINE | re.UNICODE | re.IGNORECASE)
@@ -136,6 +145,18 @@ def handle_opts() -> list[str]:
 
 
 def set_custom_opts(args: list[str]) -> dict[str, str]:
+    """
+    Set custom options for the given arguments.
+    In particular following options are supported (i.e. read from command line):
+
+    -addcat:<category_name> - Adds the given category to the pages with empty section.
+    -section:<section_name> - The name of the section to check for emptiness.
+    -action:<action_name> - The action to perform. Possible values are "dump" and "addcat".
+
+    :param args: List of command line arguments.
+    :return: Dictionary of custom options.
+
+    """
     custom_opts = dict()
 
     if any(arg.startswith("-addcat") for arg in args):
@@ -153,7 +174,6 @@ def set_custom_opts(args: list[str]) -> dict[str, str]:
 def main():
     local_args = handle_opts()
     generator, options = setup_generator(local_args)
-    set_custom_opts(local_args)
     custom_opts = set_custom_opts(local_args)
     bot = EmptySectionFinder(generator=generator, custom_opts=custom_opts, **options)
     bot.run()
