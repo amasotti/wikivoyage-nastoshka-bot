@@ -44,6 +44,8 @@ I'm currently refactoring the scripts in standard pywikibot scripts
 - [Itemlist Wikidata Completer](bot/wikivoyage/scripts/ItemlistWikidataCompleter.md) - script to fill the params `wikidata`, `lat`, `long` in Itemlist (Città and Destinazione) that lack them
 - [Empty section finder](bot/wikivoyage/scripts/EmptySectionFinder.md) - script to find empty sections in articles given the 
 name of the category and of the section to be checked
+- [Missing Itemlist Finder](bot/wikivoyage/scripts/MissingItemlistFinder.md) - script to find articles from a given category (usually `Region` or `State`) 
+that lack a list of cities or destinations, despite of referring to larger entities (states, regions)
 
 ### Start as a pywikibot script
 
