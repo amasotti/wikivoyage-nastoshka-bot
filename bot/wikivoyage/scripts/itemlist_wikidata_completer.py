@@ -65,6 +65,14 @@ class ItemListWikidataCompleter(ExistingPageBot):
             "botflag": True
         }
 
+    def get_current_page_url(self):
+        lang = self.current_page.site.lang
+        family = self.current_page.site.family
+        title = self.current_page.title()
+
+        return f"https://{lang}.{family}.org/wiki/{title}"
+
+
     def treat_page(self):
         # Get and parse the page wikicode
         content = self.current_page.text
@@ -80,7 +88,7 @@ class ItemListWikidataCompleter(ExistingPageBot):
         content = str(wikicode)
         if content != self.current_page.text:
             pywikibot.showDiff(self.current_page.text, content)
-            prompt = self.user_confirm('Do you want to accept these changes?')
+            prompt = self.user_confirm(f'Do you want to accept these changes for {self.get_current_page_url()}?')
             if prompt:
                 self.current_page.text = content
                 self.current_page.save(**self.edit_opts)
