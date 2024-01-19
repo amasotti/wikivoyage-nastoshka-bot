@@ -2,6 +2,7 @@
 import re
 
 import pywikibot
+from pywikibot import ItemPage
 from pywikibot.pagegenerators import WikidataSPARQLPageGenerator
 
 # --- Wikidata properties ---
@@ -13,6 +14,14 @@ COORDINATES = 'P625'
 class WikibaseHelper:
     def __init__(self):
         self.site = pywikibot.Site().data_repository()
+
+    def get_p_values(self, wikidata_item: ItemPage, p: str):
+        item_dict = wikidata_item.get()
+        claims = item_dict["claims"]
+        if p in claims:
+            return [claim.getTarget().title() for claim in claims[p]]
+        return []
+
 
     def is_disambiguation(self, wikidata_item):
         """
@@ -33,13 +42,13 @@ class WikibaseHelper:
     def _truncate_coordinates(coords):
         return tuple(format(x, '.6g') for x in coords)
 
-    def get_lat_long(self, wikidata_item):
+    def get_lat_long(self, wikidata_label):
         """
         Get the latitude and longitude of a given wikidata item
-        :param wikidata_item:
+        :param wikidata_label:
         :return:
         """
-        item = pywikibot.ItemPage(site=self.site, title=wikidata_item)
+        item = pywikibot.ItemPage(site=self.site, title=wikidata_label)
         item_dict = item.get()
         claims = item_dict["claims"]
         coords = (None, None)
