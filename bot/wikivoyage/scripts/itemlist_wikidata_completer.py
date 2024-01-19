@@ -79,11 +79,11 @@ class ItemListWikidataCompleter(ExistingPageBot):
         # Save the page
         content = str(wikicode)
         if content != self.current_page.text:
-            pywikibot.showDiff(content, self.current_page.text)
-            self.current_page.text = content
-            self.current_page.save(**self.edit_opts)
-        else:
-            self.skip_page(self.current_page)
+            pywikibot.showDiff(self.current_page.text, content)
+            prompt = self.user_confirm('Do you want to accept these changes?')
+            if prompt:
+                self.current_page.text = content
+                self.current_page.save(**self.edit_opts)
 
     def process_templates(self, templates):
         """
