@@ -44,6 +44,7 @@ class ItemListWikidataCompleter(ExistingPageBot):
     completer.run()
     ```
     """
+
     def __init__(self, custom_opts, **kwargs):
         super().__init__(**kwargs)
         self.wikibase_helper = WikibaseHelper()
@@ -68,14 +69,23 @@ class ItemListWikidataCompleter(ExistingPageBot):
         }
 
     def get_current_page_url(self):
+        """
+        Returns the current page URL in the format "https://{lang}.{family}.org/wiki/{title}".
+
+        :return: The URL of the current page
+        """
         lang = self.current_page.site.lang
         family = self.current_page.site.family
         title = self.current_page.title()
 
         return f"https://{lang}.{family}.org/wiki/{title}"
 
-
     def treat_page(self):
+        """
+        Processes a page by extracting templates, adding wikidata ids and saving the page.
+
+        :return: None
+        """
         # Get and parse the page wikicode
         content = self.current_page.text
         wikicode = mwparserfromhell.parse(content)
@@ -88,6 +98,14 @@ class ItemListWikidataCompleter(ExistingPageBot):
 
         # Save the page
         content = str(wikicode)
+        self._apply_changes(content)
+
+    def _apply_changes(self, content):
+        """
+        Applies the changes to the page if the user accepts them.
+        :param content: str, the new content of the page
+        :return: None
+        """
         if content != self.current_page.text:
             pywikibot.showDiff(self.current_page.text, content)
             prompt = self.user_confirm(f'Do you want to accept these changes for {self.get_current_page_url()}?')
@@ -95,7 +113,7 @@ class ItemListWikidataCompleter(ExistingPageBot):
                 self.current_page.text = content
                 self.current_page.save(**self.edit_opts)
 
-    def process_templates(self, templates):
+    def process_templates(self, templates: Iterable[Template]) -> None:
         """
         Processes templates to update the data and add additional information.
 
@@ -105,35 +123,84 @@ class ItemListWikidataCompleter(ExistingPageBot):
         """
         for template in templates:
             # Conditions
-            is_target_template = (template.name == CITY_TEMPLATE_ITEM_NAME
-                                  or template.name == DESTINATION_TEMPLATE_ITEM_NAME)
-            has_not_wikidata = not template.has(WIKIDATA_PARAM_NAME) or (
-                    template.has(WIKIDATA_PARAM_NAME) and template.get(WIKIDATA_PARAM_NAME).value.strip() == "")
+            conditions_are_met = self._check_conditions(template)
 
-            if is_target_template and has_not_wikidata:
-                name_label = template.get(NAME_PARAM_NAME).value.strip()
-                try:
-                    alt = template.get(ALT_PARAM_NAME).value.strip()
-                except:
-                    alt = ""
-                wikidata_id = self.wikibase_helper.get_wikidata_entity_by_wikipedia_article_name(name_label, alt,
-                                                                                                 lang='it')
-                if (wikidata_id == "" or wikidata_id is None):
-                    if not self.interactive:
-                        pywikibot.info(f"\tCould not find wikidata item for {name_label} -- keeping empty")
-                        continue
-                    else:
-                        wikidata_id = self.get_user_input(name_label).strip()
-                        if wikidata_id.startswith("Q"):
-                            pywikibot.info("Entered: " + wikidata_id)
-                            self._process_coordinates(name_label, wikidata_id, template)
-                            self._process_wikidata(name_label, wikidata_id, template)
-                        else:
-                            continue
-                else:
-                    # Try to also add coordinates
-                    self._process_coordinates(name_label, wikidata_id, template)
-                    self._process_wikidata(name_label, wikidata_id, template)
+            # Skip other templates and those that already have a wikidata param filled
+            if not conditions_are_met:
+                continue
+
+            # Get the name and alt label of the item for further processing
+            name_label = template.get(NAME_PARAM_NAME).value.strip()
+            alt_label = template.get(ALT_PARAM_NAME, "").value.strip()
+            wikidata_id = self.try_retrieve_wikidata_id(name_label, alt_label)
+
+            # Wikipedia has a page for the item, use it
+            if wikidata_id:
+                self.process_param_addition(name_label, template, wikidata_id)
+                continue
+
+            # Wikipedia does not have a page for the item, ask the user
+            if self.interactive:
+                self.process_user_given_wikidata_id(name_label, template)
+                continue
+
+            pywikibot.warning(f"\tCould not find wikidata item for {name_label} -- keeping empty")
+
+    def try_retrieve_wikidata_id(self, name_label: str, alt_label: str) -> str:
+
+        wikidata_id = self.wikibase_helper.get_wikidata_entity_by_wikipedia_article_name(name_label, alt_label)
+
+        return wikidata_id if wikidata_id else ""
+
+    def process_user_given_wikidata_id(self, name_label: str, template: Template) -> None:
+        """
+        Processes the wikidata id given by the user. If the id is valid, it is added to the template.
+        :param name_label: str, the name of the item
+        :param template: the template to update
+        :return: None (updates the template in place)
+        """
+        wikidata_id = self.get_user_input(name_label).strip()
+        if wikidata_id.startswith("Q"):
+            self.process_param_addition(name_label, template, wikidata_id)
+
+    def process_param_addition(self, item_label: str, template: Template, wikidata_id: str) -> None:
+        self._process_coordinates(item_label, wikidata_id, template)
+        self._process_wikidata(item_label, wikidata_id, template)
+
+    def _check_conditions(self, template: Template) -> bool:
+        """
+        Checks if the given template satisfies the conditions to be processed.
+        Conditions:
+        - the template is a target template
+        - the template does not have a wikidata param or the wikidata param is empty
+
+        :param template: the template to check
+        :return: True if the template satisfies the conditions, False otherwise
+        """
+        return self._check_target_template(template) and self._check_wikidata_param_needs_processing(template)
+
+    def _check_target_template(self, template: Template) -> bool:
+        """
+        Checks if the given template is a target template
+        Target templates in this script are {{Città}} and {{Destinazione}}
+
+        :param template: the template to check
+        :return: True if the template is a target template, False otherwise
+        """
+        return template.name == CITY_TEMPLATE_ITEM_NAME or template.name == DESTINATION_TEMPLATE_ITEM_NAME
+
+    def _check_wikidata_param_needs_processing(self, template: Template) -> bool:
+        """
+        Checks if the given template:
+        - does not have a wikidata param
+        - has a wikidata param but it is empty
+
+        :param template: the template to check
+        :return: True if the template needs processing, False otherwise
+        """
+        return (not template.has(WIKIDATA_PARAM_NAME)
+                or (template.has(WIKIDATA_PARAM_NAME)
+                    and template.get(WIKIDATA_PARAM_NAME).value.strip() == ""))
 
     def _process_coordinates(self, name, wikidata_id, template):
         """
@@ -197,7 +264,6 @@ def prepare_generator_args() -> list[str]:
 
 
 def set_custom_opts(local_args):
-
     custom_opts = dict()
 
     if any(arg.startswith("-interactive") for arg in local_args):

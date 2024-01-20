@@ -22,7 +22,6 @@ class WikibaseHelper:
             return [claim.getTarget().title() for claim in claims[p]]
         return []
 
-
     def is_disambiguation(self, wikidata_item):
         """
         Check if the given wikidata item is a disambiguation page
@@ -78,7 +77,7 @@ class WikibaseHelper:
 
         return city_name
 
-    def get_wikidata_entity_by_wikipedia_article_name(self, article_name, alt, lang='it'):
+    def get_wikidata_entity_by_wikipedia_article_name(self, article_name: str, alt: str, lang='it') -> str:
         # Try languages in the given order until we find one
         for attempted_lang in [lang, 'en']:
             wikidata_item = self.try_entity_retrieval(article_name, attempted_lang)
@@ -89,11 +88,11 @@ class WikibaseHelper:
             wikidata_item = self.try_entity_retrieval(alt, 'en')
         return self.finalize_wikidata_item(wikidata_item, article_name)
 
-    def try_entity_retrieval(self, article_name, lang):
-        item = self.run_query_for_label(article_name, lang)
+    def try_entity_retrieval(self, article_name, lang) -> str | None:
+        item: str | None = self.run_query_for_label(article_name, lang, limit=1)  # limit=1 to avoid multiple results
         return item if item else None
 
-    def finalize_wikidata_item(self, wikidata_item, article_name):
+    def finalize_wikidata_item(self, wikidata_item: str, article_name: str) -> str:
         if not wikidata_item:
             print(f"\t\tCould not find wikidata item for {article_name} -- keeping empty")
             return ""
@@ -116,11 +115,12 @@ class WikibaseHelper:
         )
         return gen
 
-    def run_query_for_label(self, entity_label, lang='it', limit=1):
+    def run_query_for_label(self, entity_label, lang='it', limit=1) -> str | list[str] | None:
         """
         Get the Wikidata item for a city if a corresponding wp article in italian or english exists
-        :param entity_label:
-        :param lang:
+        :param limit:  if 1, return only the first result, else return a list of results
+        :param entity_label: the city name
+        :param lang: the language of the city name to search wikipedias for
         :return:
         """
 
@@ -165,8 +165,6 @@ class WikibaseHelper:
             for claim in claims["P300"]:
                 return claim.getTarget().title()
         return None
-
-
 
     def write_log_line(self, text, file="logs/citylist_log.log"):
         """
