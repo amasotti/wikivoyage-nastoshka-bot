@@ -2,6 +2,7 @@ from typing import Any, Iterable
 
 import mwparserfromhell
 import pywikibot
+from mwparserfromhell.nodes import Template
 from pywikibot.bot import ExistingPageBot
 from WikibaseHelper import WikibaseHelper
 from pwb_aux import setup_generator
@@ -43,9 +44,10 @@ class ItemListWikidataCompleter(ExistingPageBot):
     completer.run()
     ```
     """
-    def __init__(self, **kwargs):
+    def __init__(self, custom_opts, **kwargs):
         super().__init__(**kwargs)
         self.wikibase_helper = WikibaseHelper()
+        self.interactive = custom_opts.get("interactive", False)
 
     @property
     def edit_opts(self):
@@ -116,9 +118,22 @@ class ItemListWikidataCompleter(ExistingPageBot):
                     alt = ""
                 wikidata_id = self.wikibase_helper.get_wikidata_entity_by_wikipedia_article_name(name_label, alt,
                                                                                                  lang='it')
-                # Try to also add coordinates
-                self._process_coordinates(name_label, wikidata_id, template)
-                self._process_wikidata(name_label, wikidata_id, template)
+                if (wikidata_id == "" or wikidata_id is None):
+                    if not self.interactive:
+                        pywikibot.info(f"\tCould not find wikidata item for {name_label} -- keeping empty")
+                        continue
+                    else:
+                        wikidata_id = self.get_user_input(name_label).strip()
+                        if wikidata_id.startswith("Q"):
+                            pywikibot.info("Entered: " + wikidata_id)
+                            self._process_coordinates(name_label, wikidata_id, template)
+                            self._process_wikidata(name_label, wikidata_id, template)
+                        else:
+                            continue
+                else:
+                    # Try to also add coordinates
+                    self._process_coordinates(name_label, wikidata_id, template)
+                    self._process_wikidata(name_label, wikidata_id, template)
 
     def _process_coordinates(self, name, wikidata_id, template):
         """
@@ -140,7 +155,7 @@ class ItemListWikidataCompleter(ExistingPageBot):
             template.add(LAT_PARAM_NAME, coords[0], before=DESCRIPTION_PARAM_NAME, preserve_spacing=True)
             template.add(LON_PARAM_NAME, coords[1], before=DESCRIPTION_PARAM_NAME, preserve_spacing=True)
 
-    def _process_wikidata(self, name, wikidata_id, template):
+    def _process_wikidata(self, name, wikidata_id, template: Template):
         """
         Add the wikidata id to the template if it exists. Basically a check that the given wikidata id
         is not an empty string. Also logs the operation
@@ -154,6 +169,15 @@ class ItemListWikidataCompleter(ExistingPageBot):
         else:
             pywikibot.logging.info(f"\tFound wikidata item for {name}: {wikidata_id}")
             template.add(WIKIDATA_PARAM_NAME, wikidata_id, before=DESCRIPTION_PARAM_NAME, preserve_spacing=True)
+
+    def get_user_input(self, item_label):
+        """
+        Gets user input for the wikidata item id
+        :param item_label: str, the label of the item
+        :return: str, the wikidata item id
+        """
+        wikidata_id = input(f"Please enter the wikidata item id for {item_label}: ")
+        return wikidata_id
 
 
 def prepare_generator_args() -> list[str]:
@@ -172,10 +196,21 @@ def prepare_generator_args() -> list[str]:
     return args
 
 
+def set_custom_opts(local_args):
+
+    custom_opts = dict()
+
+    if any(arg.startswith("-interactive") for arg in local_args):
+        custom_opts["interactive"] = True
+
+    return custom_opts
+
+
 def main():
     local_args = prepare_generator_args()
     generator, options = setup_generator(local_args)
-    bot = ItemListWikidataCompleter(generator=generator, **options)
+    custom_opts = set_custom_opts(local_args)
+    bot = ItemListWikidataCompleter(generator=generator, custom_opts=custom_opts, **options)
     bot.run()
 
 
