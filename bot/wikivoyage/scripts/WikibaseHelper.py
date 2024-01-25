@@ -70,7 +70,10 @@ class WikibaseHelper:
         :return: The cleaned city name
         """
         # Remove brackets
-        city_name = city_name.replace("[[", "").replace("]]", "")
+        city_name = city_name.trim()
+
+        if city_name.startswith("[[") and city_name.endswith("]]"):
+            city_name = city_name.replace("[[", "").replace("]]", "")
 
         # Remove alternative names
         city_name = re.sub(r'\|.*', '', city_name)

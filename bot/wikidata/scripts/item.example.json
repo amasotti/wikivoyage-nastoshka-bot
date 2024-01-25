@@ -1,0 +1,116 @@
+[
+  {
+    "labels": {
+      "en": "Bone Bight"
+    },
+    "descriptions": {
+      "en": "Beach on the Anegada Island, British Virgin Islands"
+    },
+    "claims": {
+      "coords": {
+        "property": "P625",
+        "target": {
+          "latitude": 18.736107,
+          "longitude": -64.366660
+        }
+      }
+    }
+  },
+  {
+    "labels": {
+      "en": "Cow Wreck Beach"
+    },
+    "descriptions": {
+      "en": "Beach on the Anegada Island, British Virgin Islands"
+    },
+    "claims": {
+      "coords": {
+        "property": "P625",
+        "target": {
+          "latitude": 18.745172,
+          "longitude": -64.401856
+        }
+      }
+    }
+  },
+  {
+    "labels": {
+      "en": "Flash of Beauty"
+    },
+    "descriptions": {
+      "en": "Beach on the Anegada Island, British Virgin Islands"
+    },
+    "claims": {
+      "coords": {
+        "property": "P625",
+        "target": {
+          "latitude": 18.738763,
+          "longitude": -64.305906
+        }
+      }
+    }
+  },
+  {
+    "labels": {
+      "en": "Loblolly Bay"
+    },
+    "descriptions": {
+      "en": "Beach on the Anegada Island, British Virgin Islands"
+    },
+    "claims": {
+      "coords": {
+        "property": "P625",
+        "target": {
+          "latitude": 18.738960,
+          "longitude": -64.310683
+        }
+      },
+        "instance of": {
+            "property": "P31",
+            "target": "Q39594"
+        }
+    }
+  },
+  {
+    "labels": {
+      "en": "Windlass Bight Beach"
+    },
+    "descriptions": {
+      "en": "Beach on the Anegada Island, British Virgin Islands"
+    },
+    "claims": {
+      "coords": {
+        "property": "P625",
+        "target": {
+          "latitude": 18.741624,
+          "longitude": -64.349007
+        }
+      },
+        "instance of": {
+            "property": "P31",
+            "target": ""
+        }
+    }
+  },
+  {
+    "labels": {
+      "en": "Pomato Point"
+    },
+    "descriptions": {
+      "en": "Beach on the Anegada Island, British Virgin Islands"
+    },
+    "claims": {
+      "coords": {
+        "property": "P625",
+        "target": {
+          "latitude": 18.723110,
+          "longitude": -64.399165
+        }
+      },
+      "instance of": {
+        "property": "P31",
+        "target": "Q570116"
+      }
+    }
+  }
+]

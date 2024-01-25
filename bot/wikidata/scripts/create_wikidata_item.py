@@ -120,7 +120,7 @@ def shared_claims():
 
 
 def main():
-    items = json.load(open('bot/wikidata/scripts/beaches.json', 'r', encoding='utf-8'))
+    items = json.load(open('bot/wikidata/scripts/item.example.json', 'r', encoding='utf-8'))
 
     # Merge the claims in each items['claims'] with the shared claims, if not already present
     for item in items:
