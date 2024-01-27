@@ -64,8 +64,8 @@ class ItemListWikidataCompleter(ExistingPageBot):
         return {
             "summary": f"Completo itemlists con codici wikidata",
             "watch": "nochange",
-            "minor": True,
-            "botflag": True
+            "minor": False,
+            "botflag": False
         }
 
     def get_current_page_url(self):
