@@ -161,23 +161,26 @@ class AirportModelApplier(ExistingPageBot):
         # Add the quickbar template
         quickbar_template = Template(QUICKBAR_TEMPLATE_NAME)
 
+
+        quickbar_template.add("Nome ufficiale ", banner + "\n", preserve_spacing=True)
+
         # Banner
         banner = banner if banner else "<!--Nome file dell'immagine.jpg-->"
-        quickbar_template.add("Banner", banner + "\n", preserve_spacing=True)
+        quickbar_template.add("Banner ", banner + "\n", preserve_spacing=True)
 
         # DidascaliaBanner
-        quickbar_template.add("DidascaliaBanner", "<!--Didascalia del banner-->", preserve_spacing=True)
+        quickbar_template.add("DidascaliaBanner ", "<!--Didascalia del banner-->", preserve_spacing=True)
 
         # Immagine
         image = image if image else "<!--Nome file dell'immagine.jpg-->"
-        quickbar_template.add("Immagine", image, preserve_spacing=True)
+        quickbar_template.add("Immagine ", image, preserve_spacing=True)
 
         # Didascalia
         didascalia = didascalia if didascalia else "<!--Didascalia dell'immagine-->"
-        quickbar_template.add("Didascalia", didascalia, preserve_spacing=True)
+        quickbar_template.add("Didascalia ", didascalia, preserve_spacing=True)
 
         # Tipologia aeroporto
-        quickbar_template.add("Tipologia aeroporto", "<!--internazionale / domestico-->", preserve_spacing=True)
+        quickbar_template.add("Tipologia aeroporto ", "<!--internazionale / domestico-->", preserve_spacing=True)
 
         # Stato
         try:
@@ -187,45 +190,35 @@ class AirportModelApplier(ExistingPageBot):
         quickbar_template.add("Stato", "[[" + stato + "]]", preserve_spacing=True)
 
         # Stato federato
-        quickbar_template.add("Stato federato", "<!--[[Nome dello stato federato di appartenenza]]-->",
+        quickbar_template.add("Stato federato ", "<!--[[Nome dello stato federato di appartenenza]]-->",
                               preserve_spacing=True)
 
         # Regione
-        quickbar_template.add("Regione", "<!--[[Nome della regione di appartenenza]]-->", preserve_spacing=True)
+        quickbar_template.add("Regione ", "<!--[[Nome della regione di appartenenza]]-->", preserve_spacing=True)
 
         # Territorio
-        quickbar_template.add("Territorio", "<!--[[Nome del territorio di appartenenza]]-->", preserve_spacing=True)
+        quickbar_template.add("Territorio ", "<!--[[Nome del territorio di appartenenza]]-->", preserve_spacing=True)
 
         # Città
-        quickbar_template.add("Città", "<!--[[Nome della città in cui è situato]]-->", preserve_spacing=True)
-
-        # Altitudine
-        quickbar_template.add("Altitudine",
-                              "<!--Usare il punto come simbolo delle migliaia e NON riportare la dicitura m s.l.m.-->",
-                              preserve_spacing=True)
-
-        # Superficie
-        quickbar_template.add("Superficie",
-                              "<!--Usare il punto come simbolo delle migliaia e NON riportare la dicitura m²-->",
-                              preserve_spacing=True)
+        quickbar_template.add("Città ", "<!--[[Nome della città in cui è situato]]-->", preserve_spacing=True)
 
         # Sito ufficiale
-        quickbar_template.add("Sito ufficiale", "<!--https://-->", preserve_spacing=True)
+        quickbar_template.add("Sito ufficiale ", "<!--https://-->", preserve_spacing=True)
 
         # Map
         try:
             codice_iso = self.wikibase_helper.get_iso_3166_1_from_city(self.wikibase_item).lower()
         except:
             codice_iso = "<!--tld (sigla a due lettere senza il punto) dello Stato di appartenenza-->"
-        quickbar_template.add("Map", codice_iso, preserve_spacing=True)
+        quickbar_template.add("Map ", codice_iso, preserve_spacing=True)
 
         coords = self.wikibase_helper.get_lat_long(self.wikibase_item.title())
 
         # Lat
-        quickbar_template.add("Lat", coords[0], preserve_spacing=True)
+        quickbar_template.add("Lat ", coords[0], preserve_spacing=True)
 
         # Long
-        quickbar_template.add("Long", coords[1], preserve_spacing=True)
+        quickbar_template.add("Long ", coords[1], preserve_spacing=True)
 
         wikicode.insert(0, quickbar_template)
         pywikibot.output(f"Added quickbar to {self.current_page.title()}")
