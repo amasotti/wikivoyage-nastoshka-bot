@@ -42,6 +42,18 @@ class ArticleTypeLookup:
         raise ValueError(f"Could not find article type for page {page.title()}")
 
 
+def format_quickbar(line):
+    return re.sub(r'\|\s*([^=]+?)\s*=\s*(.*?)\s*(?=\||$)', r'| \1 = \2', line)
+
+
+def format_listing(line):
+    return re.sub(r'\|\s*([^=]+)\s*=\s*(.*?)\s*(?=[|\n])', r'| \1=\2 ', line)
+
+
+def format_inline(line):
+    return re.sub(r'\|\s*([^=]+)\s*=\s*', r'| \1=', line.strip())
+
+
 def format_template_params(text):
     """
     Format template parameters in the text for specific templates.
@@ -53,71 +65,43 @@ def format_template_params(text):
         str: The text with formatted template parameters.
     """
 
-    # Define templates and their formatting styles
+    # Define templates and their formatting functions
     templates = {
-        'quickbarairport': 'quickbar',
-        'see': 'listing',
-        'do': 'listing',
-        'eat': 'listing',
-        'buy': 'listing',
-        'sleep': 'listing',
-        'drink': 'listing',
-        'listing': 'listing',
-        'marker': 'inline',
+        'quickbarairport': format_quickbar,
+        'see': format_listing,
+        'do': format_listing,
+        'eat': format_listing,
+        'buy': format_listing,
+        'sleep': format_listing,
+        'drink': format_listing,
+        'listing': format_listing,
+        'marker': format_inline,
     }
 
-    # Function to format parameters based on the template style
     def format_params(match):
-        template_name = match.group(1).strip()  # Extract and strip the template name
-        style = templates.get(template_name.lower(), None)  # Determine the formatting style
+        template_name = match.group(1).strip()
+        format_function = templates.get(template_name.lower())
 
-        # Skip processing if the template style is not recognized
-        if style is None:
+        if not format_function:
             return match.group(0)
 
-        params = match.group(2)  # Extract parameters string only if style is recognized
-        param_lines = params.split('\n')  # Split parameters by newline to preserve them
+        params = match.group(2)
+        param_lines = params.split('\n')
+        formatted_lines = [format_function(line) for line in param_lines]
 
-        # Process each line separately to preserve newlines
-        formatted_lines = []
-        for line in param_lines:
-            if style == 'quickbar':
-                # Adjusted format for quickbar: | param = value with single space around '='
-                formatted_line = re.sub(r'\|\s*([^=]+?)\s*=\s*(.*?)\s*(?=\||$)', r'| \1 = \2', line)
-            elif style == 'listing':
-                # Format for listing templates: | param=value (no space around '=')
-                formatted_line = re.sub(r'\|\s*([^=]+)\s*=\s*(.*?)\s*(?=[|\n])', r'| \1=\2 ', line)
-            elif style == 'inline':
-                # All parameters are kept on the same line
-                formatted_line = re.sub(r'\|\s*([^=]+)\s*=\s*', r'| \1=', line.strip())
-                # Join all formatted lines with a space instead of a newline
+        formatted_params = ' '.join(formatted_lines) if format_function == format_inline else '\n'.join(formatted_lines)
+        template_format = '{{' + template_name + '{}{}'.format('\n' if format_function != format_inline else ' ',
+                                                                   formatted_params) + '}}'
 
-            formatted_lines.append(formatted_line)
-        if style != 'inline':
-            # Join the processed lines back together, preserving newlines
-            formatted_params = '\n'.join(formatted_lines)
-        else:
-            formatted_params = ' '.join(formatted_lines)
+        return template_format
 
-        # Add a newline character after the template name
-        if style == 'quickbar':
-            return '{{' + template_name + '\n' + formatted_params + '}}'
-        elif style == 'inline':
-            return '{{' + template_name + formatted_params + '}}'
-        elif style == 'listing':
-            return '{{' + template_name + '\n' + formatted_params + '}}'
-        return match.group(0)
-
-    # Define the regex pattern for matching templates and their parameters
     template_pattern = r'\{\{\s*([^}|]+)\s*(\|[^}]+)\}\}'
-
-    # Use the sub() function to replace the matched text with formatted parameters
     formatted_text = re.sub(template_pattern, format_params, text, flags=re.IGNORECASE)
 
     return formatted_text
 
 
-def terminate_before_section_level_two(text: str, exception: str =["Da sapere"]) -> str:
+def terminate_before_section_level_two(text: str, exception: str = ["Da sapere"]) -> str:
     """
     Add {{-}} directly after the text preceding a level two section, followed by one newline.
 
