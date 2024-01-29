@@ -1,13 +1,16 @@
+import re
 from typing import Any
 
 import mwparserfromhell
 import pywikibot
 from mwparserfromhell.nodes import Template, Node
 from mwparserfromhell.wikicode import Wikicode
+from pywikibot import textlib, cosmetic_changes
 from pywikibot.bot import ExistingPageBot
 from wikitextparser import ExternalLink
 
 from WikibaseHelper import WikibaseHelper
+from voy_aux import format_template_params, terminate_before_section_level_two
 from pwb_aux import setup_generator
 
 # --- it.wikivoyage specific constants ---
@@ -96,7 +99,7 @@ class AirportModelApplier(ExistingPageBot):
         #     p.close()
 
         # add space separator {{-}} after each main section (level 2)
-        self.clear_space_after_sections(wikicode)
+        #self.clear_space_after_sections(wikicode)
 
         # with open(f"output/separators_example_{self.current_page.title()}.txt", "w") as p:
         #     p.write(str(wikicode))
@@ -111,9 +114,12 @@ class AirportModelApplier(ExistingPageBot):
 
         self.matched_pages.append(self.current_page.title())
 
-        pywikibot.showDiff(content, str(wikicode))
+        wikicode_str = format_template_params(str(wikicode))
+        wikicode_str = terminate_before_section_level_two(wikicode_str)
+
+        pywikibot.showDiff(content, wikicode_str)
         with open(f"output/wikitext_{self.current_page.title()}.txt", "w") as p:
-            p.write(str(wikicode))
+            p.write(wikicode_str)
             p.close()
 
             self.user_confirm("Do you want to save the page?")
@@ -125,16 +131,22 @@ class AirportModelApplier(ExistingPageBot):
             if template.name.matches("IATA"):
                 # remove the template
                 wikicode.remove(template)
-                wikicode.replace("()", "")
+                wikicode.replace(" ()", "")
 
     def cleanup_intro(self, wikicode: Wikicode):
         # Identify the bold external link and replace it with just the text, without the link
-        external_links = wikicode.filter_external_links()
-        for link in external_links: # type: ExternalLink
-            if link.title.strip().lower() == self.current_page.title().lower():
-                wikicode.replace(link, link.title.strip())
-                break
-
+        initial_section = wikicode.get_sections()[0]  # type: Node
+        external_links = initial_section.filter_external_links()
+        for link in external_links:  # type: ExternalLink
+            try:
+                if link.title.strip().lower() == self.current_page.title().lower():
+                    wikicode.replace(link, self.current_page.title(with_ns=False,underscore=False))
+                    break
+            except Exception as e:
+                print(e)
+                print(link)
+                print(link.title)
+                raise e
 
     def has_right_quickbar_and_quickfooter(self, templates: list[Template]) -> bool:
         for template in templates:
@@ -181,7 +193,7 @@ class AirportModelApplier(ExistingPageBot):
             pywikibot.output(f"Error while removing image from {self.current_page.title()}: {e}")
             return "", "", wikicode
 
-    def format_param_value(self,value: str):
+    def format_param_value(self, value: str):
         # replace leading and trailing spaces with no space, no matter how many
         cleaned = str(value).strip()
         cleaned = cleaned.strip().replace("\n", "").replace(" ", " ")
@@ -192,15 +204,16 @@ class AirportModelApplier(ExistingPageBot):
         # Add the quickbar template
         quickbar_template = Template(QUICKBAR_TEMPLATE_NAME)
 
-
-        quickbar_template.add("Nome ufficiale ",  self.format_param_value("<!--Nome dell'aeroporto-->"), preserve_spacing=True)
+        quickbar_template.add("Nome ufficiale ", self.format_param_value("<!--Nome dell'aeroporto-->"),
+                              preserve_spacing=True)
 
         # Banner
         banner = banner if banner else "<!--Nome file dell'immagine.jpg-->"
         quickbar_template.add("Banner ", self.format_param_value(banner), preserve_spacing=False)
 
         # DidascaliaBanner
-        quickbar_template.add("DidascaliaBanner ", self.format_param_value("<!--Didascalia del banner-->"), preserve_spacing=False)
+        quickbar_template.add("DidascaliaBanner ", self.format_param_value("<!--Didascalia del banner-->"),
+                              preserve_spacing=False)
 
         # Immagine
         image = image if image else "<!--Nome file dell'immagine.jpg-->"
@@ -208,7 +221,7 @@ class AirportModelApplier(ExistingPageBot):
 
         # Didascalia
         didascalia = didascalia if didascalia else "<!--Didascalia dell'immagine-->"
-        quickbar_template.add("Didascalia ",self.format_param_value(didascalia), preserve_spacing=False)
+        quickbar_template.add("Didascalia ", self.format_param_value(didascalia), preserve_spacing=False)
 
         # Stato
         try:
@@ -218,17 +231,21 @@ class AirportModelApplier(ExistingPageBot):
         quickbar_template.add("Stato", " [[" + stato + "]]\n", preserve_spacing=False)
 
         # Stato federato
-        quickbar_template.add("Stato federato ", self.format_param_value("<!--[[Nome dello stato federato di appartenenza]]-->"),
+        quickbar_template.add("Stato federato ",
+                              self.format_param_value("<!--[[Nome dello stato federato di appartenenza]]-->"),
                               preserve_spacing=False)
 
         # Regione
-        quickbar_template.add("Regione ", self.format_param_value("<!--[[Nome della regione di appartenenza]]-->"), preserve_spacing=False)
+        quickbar_template.add("Regione ", self.format_param_value("<!--[[Nome della regione di appartenenza]]-->"),
+                              preserve_spacing=False)
 
         # Territorio
-        quickbar_template.add("Territorio ", self.format_param_value("<!--[[Nome del territorio di appartenenza]]-->"), preserve_spacing=False)
+        quickbar_template.add("Territorio ", self.format_param_value("<!--[[Nome del territorio di appartenenza]]-->"),
+                              preserve_spacing=False)
 
         # Città
-        quickbar_template.add("Città ", self.format_param_value("<!--[[Nome della città in cui è situato]]-->"), preserve_spacing=False)
+        quickbar_template.add("Città ", self.format_param_value("<!--[[Nome della città in cui è situato]]-->"),
+                              preserve_spacing=False)
 
         # Sito ufficiale
         quickbar_template.add("Sito ufficiale ", self.format_param_value("<!--https://-->"), preserve_spacing=False)
@@ -267,33 +284,36 @@ class AirportModelApplier(ExistingPageBot):
             self.add_space_end_of_section(wikicode, sec)
         pywikibot.output(f"Processed space separator to {self.current_page.title()}")
 
-
     def add_do_listing_example(self, wikicode: Wikicode):
         secs = wikicode.get_sections(levels=[2])
         for sec in secs:
             if sec.nodes[0].title.strip() == "Cosa fare":
-                sec.insert_after(sec.nodes[0], """\n<!--* {{do\n| nome= | alt= | sito= | email=\n| indirizzo= | lat= | long= | indicazioni=\n| tel= | numero verde= | fax=\n| orari= | prezzo=\n| descrizione=\n}}-->\n""")
+                sec.insert_after(sec.nodes[0],
+                                 """\n<!--* {{do\n| nome= | alt= | sito= | email=\n| indirizzo= | lat= | long= | indicazioni=\n| tel= | numero verde= | fax=\n| orari= | prezzo=\n| descrizione=\n}}-->\n""")
                 break
 
     def add_buy_listing_example(self, wikicode: Wikicode):
         secs = wikicode.get_sections(levels=[2])
         for sec in secs:
             if sec.nodes[0].title.strip() == "Acquisti":
-                sec.insert_after(sec.nodes[0], """\n<!--* {{buy\n| nome= | alt= | sito= | email=\n| indirizzo= | lat= | long= | indicazioni=\n| tel= | numero verde= | fax=\n| orari= | prezzo=\n| descrizione=\n}}-->\n""")
+                sec.insert_after(sec.nodes[0],
+                                 """\n<!--* {{buy\n| nome= | alt= | sito= | email=\n| indirizzo= | lat= | long= | indicazioni=\n| tel= | numero verde= | fax=\n| orari= | prezzo=\n| descrizione=\n}}-->\n""")
                 break
 
     def add_eat_listing_example(self, wikicode: Wikicode):
         secs = wikicode.get_sections(levels=[2])
         for sec in secs:
             if sec.nodes[0].title.strip() == "Dove mangiare":
-                sec.insert_after(sec.nodes[0], """\n<!--* {{eat\n| nome= | alt= | sito= | email=\n| indirizzo= | lat= | long= | indicazioni=\n| tel= | numero verde= | fax=\n| | orari= | prezzo=\n| descrizione=\n}}-->\n""")
+                sec.insert_after(sec.nodes[0],
+                                 """\n<!--* {{eat\n| nome= | alt= | sito= | email=\n| indirizzo= | lat= | long= | indicazioni=\n| tel= | numero verde= | fax=\n| | orari= | prezzo=\n| descrizione=\n}}-->\n""")
                 break
 
     def add_sleep_listing_example(self, wikicode: Wikicode):
         secs = wikicode.get_sections(levels=[2])
         for sec in secs:
             if sec.nodes[0].title.strip() == "Dove alloggiare":
-                sec.insert_after(sec.nodes[0], """\n<!--* {{sleep\n| nome= | alt= | sito= | email=\n| indirizzo= | lat= | long= | indicazioni=\n| tel= | numero verde= | fax=\n| checkin= | checkout=| prezzo=\n| descrizione=\n}}-->\n""")
+                sec.insert_after(sec.nodes[0],
+                                 """\n<!--* {{sleep\n| nome= | alt= | sito= | email=\n| indirizzo= | lat= | long= | indicazioni=\n| tel= | numero verde= | fax=\n| checkin= | checkout=| prezzo=\n| descrizione=\n}}-->\n""")
                 break
 
     def add_listing_example(self, wikicode: Wikicode):
@@ -304,7 +324,6 @@ class AirportModelApplier(ExistingPageBot):
             self.add_sleep_listing_example(wikicode)
         except Exception as e:
             pywikibot.output(f"Error while adding listing example to {self.current_page.title()}: {e}")
-
 
     def process_quickfooter(self, wikicode: Wikicode):
         quickfooter_templates = wikicode.filter_templates(matches=lambda template: template.name.matches("Quickfooter"))
