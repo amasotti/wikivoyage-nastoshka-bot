@@ -88,8 +88,10 @@ class AirportModelApplier(ExistingPageBot):
         # Remove image if same as wikidata image
         image, didascalia, wikicode = self.remove_image(wikicode)
 
+        sito = self.cleanup_intro(wikicode)
+
         # add quickbar template on the very top of the page
-        self.add_quickbar(wikicode, banner, image, didascalia)
+        self.add_quickbar(wikicode, banner, image, didascalia, sito)
 
         # Add examples of listing to use
         self.add_listing_example(wikicode)
@@ -106,8 +108,6 @@ class AirportModelApplier(ExistingPageBot):
         #     p.close()
 
         self.remove_IATA(wikicode)
-
-        self.cleanup_intro(wikicode)
 
         # modify quickfooter on the very bottom of the page
         self.process_quickfooter(wikicode)
@@ -141,12 +141,12 @@ class AirportModelApplier(ExistingPageBot):
             try:
                 if link.title.strip().lower() == self.current_page.title().lower():
                     wikicode.replace(link, self.current_page.title(with_ns=False,underscore=False))
-                    break
+                    return link.url.strip()
             except Exception as e:
                 print(e)
                 print(link)
                 print(link.title)
-                raise e
+                return ""
 
     def has_right_quickbar_and_quickfooter(self, templates: list[Template]) -> bool:
         for template in templates:
@@ -200,7 +200,7 @@ class AirportModelApplier(ExistingPageBot):
         # Add one space before and a new line after
         return " " + cleaned + "\n"
 
-    def add_quickbar(self, wikicode: Wikicode, banner: str, image: str, didascalia: str):
+    def add_quickbar(self, wikicode: Wikicode, banner: str, image: str, didascalia: str, sito: str):
         # Add the quickbar template
         quickbar_template = Template(QUICKBAR_TEMPLATE_NAME)
 
@@ -248,7 +248,8 @@ class AirportModelApplier(ExistingPageBot):
                               preserve_spacing=False)
 
         # Sito ufficiale
-        quickbar_template.add("Sito ufficiale ", self.format_param_value("<!--https://-->"), preserve_spacing=False)
+        sito = sito if sito else "<!--https://-->"
+        quickbar_template.add("Sito ufficiale ", self.format_param_value(sito), preserve_spacing=False)
 
         # Map
         try:
