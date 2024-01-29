@@ -41,6 +41,17 @@ class WikibaseHelper:
     def _truncate_coordinates(coords):
         return tuple(format(x, '.6g') for x in coords)
 
+    def get_coords(self, wikidata_entity : ItemPage):
+        item_dict = wikidata_entity.get()
+        claims = item_dict["claims"]
+        coords = {"lat": None, "long": None}
+        if COORDINATES in claims:
+            for claim in claims[COORDINATES]:
+                raw_coords = claim.getTarget().lat, claim.getTarget().lon
+                coords["lat"] = format(raw_coords[0], '.6g')
+                coords["long"] = format(raw_coords[1], '.6g')
+        return coords
+
     def get_lat_long(self, wikidata_label):
         """
         Get the latitude and longitude of a given wikidata item
@@ -179,6 +190,20 @@ class WikibaseHelper:
         with open(file, 'a') as f:
             f.write(text)
             f.close()
+
+    def get_image(self, wikidata_entity: ItemPage):
+        """
+        Get the image of a given wikidata item
+        :param wikidata_entity:
+        :return:
+        """
+        item_dict = wikidata_entity.get()
+        claims = item_dict["claims"]
+        if "P18" in claims:
+            for claim in claims["P18"]:
+                return claim.getTarget().title()
+        return None
+
 
     def get_country_from_city(self, city_entity):
         """

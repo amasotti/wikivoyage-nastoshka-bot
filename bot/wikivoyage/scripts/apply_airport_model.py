@@ -5,6 +5,8 @@ import pywikibot
 from mwparserfromhell.nodes import Template, Node
 from mwparserfromhell.wikicode import Wikicode
 from pywikibot.bot import ExistingPageBot
+from wikitextparser import ExternalLink
+
 from WikibaseHelper import WikibaseHelper
 from pwb_aux import setup_generator
 
@@ -22,7 +24,6 @@ SECTIONS_WITH_LISTINGS = [
     "Dove alloggiare",
     "Come restare in contatto",
     "Nei dintorni",
-    "Informazioni utili",
 ]
 
 
@@ -101,16 +102,39 @@ class AirportModelApplier(ExistingPageBot):
         #     p.write(str(wikicode))
         #     p.close()
 
+        self.remove_IATA(wikicode)
+
+        self.cleanup_intro(wikicode)
+
         # modify quickfooter on the very bottom of the page
         self.process_quickfooter(wikicode)
 
         self.matched_pages.append(self.current_page.title())
 
+        pywikibot.showDiff(content, str(wikicode))
         with open(f"output/wikitext_{self.current_page.title()}.txt", "w") as p:
             p.write(str(wikicode))
             p.close()
 
             self.user_confirm("Do you want to save the page?")
+
+    def remove_IATA(self, wikicode: Wikicode):
+        # ({{IATA|XXX}}) -> ""
+        templates = wikicode.filter_templates()  # type: list[Template]
+        for template in templates:
+            if template.name.matches("IATA"):
+                # remove the template
+                wikicode.remove(template)
+                wikicode.replace("()", "")
+
+    def cleanup_intro(self, wikicode: Wikicode):
+        # Identify the bold external link and replace it with just the text, without the link
+        external_links = wikicode.filter_external_links()
+        for link in external_links: # type: ExternalLink
+            if link.title.strip().lower() == self.current_page.title().lower():
+                wikicode.replace(link, link.title.strip())
+                break
+
 
     def has_right_quickbar_and_quickfooter(self, templates: list[Template]) -> bool:
         for template in templates:
@@ -157,68 +181,72 @@ class AirportModelApplier(ExistingPageBot):
             pywikibot.output(f"Error while removing image from {self.current_page.title()}: {e}")
             return "", "", wikicode
 
+    def format_param_value(self,value: str):
+        # replace leading and trailing spaces with no space, no matter how many
+        cleaned = str(value).strip()
+        cleaned = cleaned.strip().replace("\n", "").replace(" ", " ")
+        # Add one space before and a new line after
+        return " " + cleaned + "\n"
+
     def add_quickbar(self, wikicode: Wikicode, banner: str, image: str, didascalia: str):
         # Add the quickbar template
         quickbar_template = Template(QUICKBAR_TEMPLATE_NAME)
 
 
-        quickbar_template.add("Nome ufficiale ", banner + "\n", preserve_spacing=True)
+        quickbar_template.add("Nome ufficiale ",  self.format_param_value("<!--Nome dell'aeroporto-->"), preserve_spacing=True)
 
         # Banner
         banner = banner if banner else "<!--Nome file dell'immagine.jpg-->"
-        quickbar_template.add("Banner ", banner + "\n", preserve_spacing=True)
+        quickbar_template.add("Banner ", self.format_param_value(banner), preserve_spacing=False)
 
         # DidascaliaBanner
-        quickbar_template.add("DidascaliaBanner ", "<!--Didascalia del banner-->", preserve_spacing=True)
+        quickbar_template.add("DidascaliaBanner ", self.format_param_value("<!--Didascalia del banner-->"), preserve_spacing=False)
 
         # Immagine
         image = image if image else "<!--Nome file dell'immagine.jpg-->"
-        quickbar_template.add("Immagine ", image, preserve_spacing=True)
+        quickbar_template.add("Immagine ", self.format_param_value(image), preserve_spacing=False)
 
         # Didascalia
         didascalia = didascalia if didascalia else "<!--Didascalia dell'immagine-->"
-        quickbar_template.add("Didascalia ", didascalia, preserve_spacing=True)
-
-        # Tipologia aeroporto
-        quickbar_template.add("Tipologia aeroporto ", "<!--internazionale / domestico-->", preserve_spacing=True)
+        quickbar_template.add("Didascalia ",self.format_param_value(didascalia), preserve_spacing=False)
 
         # Stato
         try:
             stato = self.wikibase_item.get()["claims"]["P17"][0].getTarget().labels["it"]
         except:
             stato = "<!--[[Nome dello stato di appartenenza]]-->"
-        quickbar_template.add("Stato", "[[" + stato + "]]", preserve_spacing=True)
+        quickbar_template.add("Stato", " [[" + stato + "]]\n", preserve_spacing=False)
 
         # Stato federato
-        quickbar_template.add("Stato federato ", "<!--[[Nome dello stato federato di appartenenza]]-->",
-                              preserve_spacing=True)
+        quickbar_template.add("Stato federato ", self.format_param_value("<!--[[Nome dello stato federato di appartenenza]]-->"),
+                              preserve_spacing=False)
 
         # Regione
-        quickbar_template.add("Regione ", "<!--[[Nome della regione di appartenenza]]-->", preserve_spacing=True)
+        quickbar_template.add("Regione ", self.format_param_value("<!--[[Nome della regione di appartenenza]]-->"), preserve_spacing=False)
 
         # Territorio
-        quickbar_template.add("Territorio ", "<!--[[Nome del territorio di appartenenza]]-->", preserve_spacing=True)
+        quickbar_template.add("Territorio ", self.format_param_value("<!--[[Nome del territorio di appartenenza]]-->"), preserve_spacing=False)
 
         # Città
-        quickbar_template.add("Città ", "<!--[[Nome della città in cui è situato]]-->", preserve_spacing=True)
+        quickbar_template.add("Città ", self.format_param_value("<!--[[Nome della città in cui è situato]]-->"), preserve_spacing=False)
 
         # Sito ufficiale
-        quickbar_template.add("Sito ufficiale ", "<!--https://-->", preserve_spacing=True)
+        quickbar_template.add("Sito ufficiale ", self.format_param_value("<!--https://-->"), preserve_spacing=False)
 
         # Map
         try:
             codice_iso = self.wikibase_helper.get_iso_3166_1_from_city(self.wikibase_item).lower()
         except:
             codice_iso = "<!--tld (sigla a due lettere senza il punto) dello Stato di appartenenza-->"
-        quickbar_template.add("Map ", codice_iso, preserve_spacing=True)
+        quickbar_template.add("Map ", self.format_param_value(codice_iso), preserve_spacing=False)
 
         coords = self.wikibase_helper.get_lat_long(self.wikibase_item.title())
 
         # Lat
-        quickbar_template.add("Lat ", coords[0], preserve_spacing=True)
+        quickbar_template.add("Lat ", coords[0] + "\n", preserve_spacing=False)
 
         # Long
-        quickbar_template.add("Long ", coords[1], preserve_spacing=True)
+        quickbar_template.add("Long ", coords[1] + "\n", preserve_spacing=False)
 
         wikicode.insert(0, quickbar_template)
         pywikibot.output(f"Added quickbar to {self.current_page.title()}")
