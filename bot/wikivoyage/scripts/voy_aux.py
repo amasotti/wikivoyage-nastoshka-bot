@@ -129,3 +129,38 @@ def terminate_before_section_level_two(text: str, exception: str = ["Da sapere"]
     formatted_text = re.sub(section_pattern, replace_section, text, flags=re.DOTALL)
 
     return formatted_text
+
+def format_section_begin(text: str) -> str:
+    section_pattern = r'(?<!\=)==\s*([^=].*?)\s*==(?!=)(.*?)\n(?!$)'
+    formatted_text = re.sub(section_pattern, r'== \1 ==\n\2\n', text, flags=re.DOTALL)
+
+    return formatted_text
+
+def format_section_titles(text):
+    """
+    Ensure there is a space between the series of equal signs and the section title.
+
+    Args:
+        text (str): The wikitext to process.
+
+    Returns:
+        str: The text with formatted section titles.
+    """
+
+    # Define the regex pattern for matching section titles of all levels
+    section_pattern = r'(={2,})\s*(.*?)\s*\1'
+
+    # Function to format section titles
+    def format_title(match):
+        equal_signs = match.group(1)  # Extract the series of equal signs
+        title = match.group(2).strip()  # Extract and strip the section title
+
+        # Format the section title with spaces between equal signs and the title
+        return f'{equal_signs} {title} {equal_signs}'
+
+    # Use the sub() function to replace the matched text with formatted section titles
+    formatted_text = re.sub(section_pattern, format_title, text)
+
+    return formatted_text
+
+

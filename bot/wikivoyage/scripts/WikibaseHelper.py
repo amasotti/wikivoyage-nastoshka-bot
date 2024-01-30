@@ -204,6 +204,33 @@ class WikibaseHelper:
                 return claim.getTarget().title()
         return None
 
+    def get_banner(self, wikidata_entity: ItemPage):
+        """
+        Get the banner of a given wikidata item
+        :param wikidata_entity:
+        :return:
+        """
+        item_dict = wikidata_entity.get()
+        claims = item_dict["claims"]
+        if "P948" in claims:
+            for claim in claims["P948"]:
+                return claim.getTarget().title()
+        return None
+
+    def get_administrative_unit(self, wikidata_entity: ItemPage):
+        """
+        Get the administrative unit of a given wikidata item
+        :param wikidata_entity:
+        :return:
+        """
+        item_dict = wikidata_entity.get()
+        claims = item_dict["claims"]
+        if "P131" in claims:
+            for claim in claims["P131"]:
+                entity = claim.getTarget()
+                label = entity.labels["it"] if "it" in entity.labels else entity.labels["en"]
+                return label
+        return None
 
     def get_country_from_city(self, city_entity):
         """
