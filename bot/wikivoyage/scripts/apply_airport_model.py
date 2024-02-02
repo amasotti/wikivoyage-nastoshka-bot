@@ -10,7 +10,7 @@ from pywikibot.bot import ExistingPageBot
 from wikitextparser import ExternalLink
 
 from WikibaseHelper import WikibaseHelper
-from voy_aux import format_template_params, terminate_before_section_level_two, format_section_titles
+from voy_aux import format_template_params, terminate_before_section_level_two, format_section_titles, add_quickbar_image, add_banner_image, add_mappa_dinamica
 from pwb_aux import setup_generator
 
 # --- it.wikivoyage specific constants ---

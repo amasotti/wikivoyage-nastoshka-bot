@@ -1,7 +1,9 @@
 import re
 from enum import Enum
-
+from typing import Iterable
 import pywikibot
+from mwparserfromhell.nodes import Template
+from mwparserfromhell.wikicode import Wikicode
 
 
 class ArticleTypes(Enum):
@@ -76,6 +78,11 @@ def format_template_params(text):
         'drink': format_listing,
         'listing': format_listing,
         'marker': format_inline,
+        'Destinazione': format_inline,
+        'Città': format_inline,
+        'Destinationlist': format_quickbar,
+        'Regionlist': format_quickbar,
+        'MappaDinamica': format_quickbar,
     }
 
     def format_params(match):
@@ -91,7 +98,7 @@ def format_template_params(text):
 
         formatted_params = ' '.join(formatted_lines) if format_function == format_inline else '\n'.join(formatted_lines)
         template_format = '{{' + template_name + '{}{}'.format('\n' if format_function != format_inline else ' ',
-                                                                   formatted_params) + '}}'
+                                                               formatted_params) + '}}'
 
         return template_format
 
@@ -130,11 +137,87 @@ def terminate_before_section_level_two(text: str, exception: str = ["Da sapere"]
 
     return formatted_text
 
+
+def add_banner_image(templates: Iterable[Template], image: str):
+    for template in templates:
+        if template.name.lower() == "Quickbar\n":
+            template.add("Banner", image)
+            break
+
+
+def add_quickbar_image(templates: Iterable[Template], image: str) -> str:
+    for template in templates:
+        if template.name.lower() == "Quickbar\n":
+            template.add("Immagine", image)
+            break
+
+
+def add_mappa_dinamica(page_text: Wikicode, templates: Iterable[Template], coords, zoom=8):
+    # If there is already a dynamic map, ignore the rest
+    if _check_mappa_dinamica_exist(templates):
+        return
+
+    # If there is a region list, just add the dynamic map
+    try:
+        if _check_region_list_exist(templates):
+            for template in templates:
+                try:
+                    if template.name == "Regionlist\n":
+                        template.add("regionInteractiveMap", "map1", before=template.get("region1name"))
+                        template.add("regionmapLat", coords["lat"], preserve_spacing=True, before=template.get("region1name"))
+                        template.add("regionmapLong", coords["long"], preserve_spacing=True, before=template.get("region1name"))
+                        template.add("regionmapsize", "450px", preserve_spacing=True, before=template.get("region1name"))
+                        template.add("regionmapZoom", str(zoom) + "\n\n", preserve_spacing=True, before=template.get("region1name"))
+                        break
+                except:
+                    pywikibot.error("Error adding dynamic map to region list, template: " + str(template))
+                    raise ValueError("Error adding dynamic map to region list")
+        else:
+            # If there is no region list and no dynamic map, add the dynamic map and the region list
+            template = Template("MappaDinamica\n")
+            try:
+                template.add("Lat", coords["lat"] + "\n", preserve_spacing=False)
+                template.add("Long", coords["long"] + "\n", preserve_spacing=False)
+                template.add("h", "450", preserve_spacing=False)
+                template.add("w", "450", preserve_spacing=False)
+                template.add("z", str(zoom), preserve_spacing=False)
+                template.add("view", "Kartographer\n", preserve_spacing=False)
+            except:
+                pywikibot.error("Error creating dynamic map template for page: " + str(template))
+                raise ValueError("Error creating dynamic map template")
+
+            sections = page_text.get_sections(levels=[2], flat=True)
+            for section in sections:
+                try:
+                    if section.get(0) == "== Territori e mete turistiche ==":
+                        mappa_str = "\n" + str(template) + "\n"
+                        section.insert(2, mappa_str)
+                        break
+                except:
+                    continue
+    except:
+        pywikibot.error("Error adding dynamic map to page: ")
+
+def _check_mappa_dinamica_exist(templates: Iterable[Template]) -> bool:
+    for template in templates:
+        if template.name == "MappaDinamica\n":
+            return True
+    return False
+
+
+def _check_region_list_exist(templates: Iterable[Template]) -> bool:
+    for template in templates:
+        if template.name == "Regionlist\n" and not template.has("regionInteractiveMap"):
+            return True
+    return False
+
+
 def format_section_begin(text: str) -> str:
     section_pattern = r'(?<!\=)==\s*([^=].*?)\s*==(?!=)(.*?)\n(?!$)'
     formatted_text = re.sub(section_pattern, r'== \1 ==\n\2\n', text, flags=re.DOTALL)
 
     return formatted_text
+
 
 def format_section_titles(text):
     """
@@ -162,5 +245,3 @@ def format_section_titles(text):
     formatted_text = re.sub(section_pattern, format_title, text)
 
     return formatted_text
-
-

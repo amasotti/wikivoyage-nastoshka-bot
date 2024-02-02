@@ -244,3 +244,29 @@ class WikibaseHelper:
             for claim in claims["P17"]:
                 return claim.getTarget().title()
         return None
+
+    def get_banner(self, wikidata_entity: ItemPage):
+        """
+        Get the banner of a given wikidata item
+        :param wikidata_entity:
+        :return:
+        """
+        item_dict = wikidata_entity.get()
+        claims = item_dict["claims"]
+        if "P948" in claims:
+            for claim in claims["P948"]:
+                return claim.getTarget().title().replace("File:", "")
+        return None
+
+    def get_image(self, wikidata_entity: ItemPage):
+        """
+        Get the image of a given wikidata item
+        :param wikidata_entity:
+        :return:
+        """
+        item_dict = wikidata_entity.get()
+        claims = item_dict["claims"]
+        if "P18" in claims:
+            for claim in claims["P18"]:
+                return claim.getTarget().title().replace("File:", "")
+        return None

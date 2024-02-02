@@ -3,9 +3,12 @@ from typing import Any, Iterable
 import mwparserfromhell
 import pywikibot
 from mwparserfromhell.nodes import Template
+from mwparserfromhell.wikicode import Wikicode
 from pywikibot.bot import ExistingPageBot
 from WikibaseHelper import WikibaseHelper
 from pwb_aux import setup_generator
+from voy_aux import format_template_params, terminate_before_section_level_two, add_quickbar_image, add_banner_image, \
+    add_mappa_dinamica
 
 # --- it.wikivoyage specific constants ---
 DESTINATION_TEMPLATE_ITEM_NAME = "Destinazione"
@@ -65,7 +68,7 @@ class ItemListWikidataCompleter(ExistingPageBot):
             "summary": f"Completo itemlists con codici wikidata",
             "watch": "nochange",
             "minor": False,
-            "botflag": False
+            "botflag": True
         }
 
     def get_current_page_url(self):
@@ -96,9 +99,18 @@ class ItemListWikidataCompleter(ExistingPageBot):
         # Add wikidata ids to the templates if they are missing and can be found
         self.process_templates(templates)
 
-        # Save the page
-        content = str(wikicode)
-        self._apply_changes(content)
+        # Add quickbar image and banner image
+        self._process_quickbar(templates)
+
+        # Add mappa dinamica
+        self._process_map(wikicode, templates)
+
+        # Format the page
+        wikicode_str = str(wikicode)
+        wikicode_str = format_template_params(wikicode_str)
+        #wikicode_str = terminate_before_section_level_two(wikicode_str)
+
+        self._apply_changes(wikicode_str)
 
     def _apply_changes(self, content):
         """
@@ -236,6 +248,18 @@ class ItemListWikidataCompleter(ExistingPageBot):
         else:
             pywikibot.logging.info(f"\tFound wikidata item for {name}: {wikidata_id}")
             template.add(WIKIDATA_PARAM_NAME, wikidata_id, before=DESCRIPTION_PARAM_NAME, preserve_spacing=True)
+
+    def _process_quickbar(self, templates: Iterable[Template]):
+        image = self.wikibase_helper.get_image(self.current_page.data_item())
+        banner = self.wikibase_helper.get_banner(self.current_page.data_item())
+        if image:
+            add_quickbar_image(templates, image)
+        if banner:
+            add_banner_image(templates, banner)
+
+    def _process_map(self, wikicode: Wikicode, templates: Iterable[Template]) -> None:
+        coords = self.wikibase_helper.get_coords(self.current_page.data_item())
+        add_mappa_dinamica(wikicode, templates, coords, 8)
 
     def get_user_input(self, item_label):
         """
