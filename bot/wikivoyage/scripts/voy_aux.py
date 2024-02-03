@@ -159,7 +159,7 @@ def add_mappa_dinamica(page_text: Wikicode, templates: Iterable[Template], coord
 
     # If there is a region list, just add the dynamic map
     try:
-        if _check_region_list_exist(templates):
+        if not _check_region_list_exist(templates):
             for template in templates:
                 try:
                     if template.name == "Regionlist\n":
