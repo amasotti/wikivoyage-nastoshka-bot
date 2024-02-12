@@ -23,13 +23,13 @@ Per iniziare c'è bisogno di pochi *ingredienti*:
     * l' **interprete** Python, che permette di eseguire script direttamente da riga di comando (Powershell, CMD, Bash, ecc.)
     * il **package manager** `pip`, che permette di installare e gestire i moduli Python (chiamati anche *pacchetti* o *librerie*) nel caso vi servano 
     moduli aggiuntivi a quelli già installati con Python.
-* **pywikibot** (versione 8.6 o successive): è il modulo Python che permette di interagire con i progetti Wikimedia. Permette di fare praticamente tutto quello 
+* **[pywikibot](https://www.mediawiki.org/wiki/Manual:Pywikibot)** (versione 8.6 o successive): è il modulo Python che permette di interagire con i progetti Wikimedia. Permette di fare praticamente tutto quello 
     che si può fare manualmente, ma in modo automatico (creare, avvisare e bloccare utenti, categorizzare pagine, estrarre templates, creare, modificare, proteggere o cancellare pagine ecc.). 
     Arrivato alla versione 8.6 (con la v.9 già in sviluppo), pywikibot è un modulo molto complesso, e la sua documentazione è molto vasta e complessa, ma per iniziare a usarlo non è necessario
     conoscere tutto. In sostanza quello che pywikibot porta con se è una serie di classi, metodi e pratiche funzioni per interagire con ogni aspetto di un progetto Wikimedia. Sono
     anche disponibili una serie di script già pronti per fare operazioni comuni, e che possono essere usati come base per script più complessi.
     Il motivo per cui è molto amato risiede nel fatto che è incredibilmente facile da estendere e personalizzare.
-* **git** (opzionale) Per utilizzare gli scripts in questo repository e magari modificarli è consigliato utilizzare un VCS (*version control system*). Git è un sistema di controllo versione distribuito, 
+* **git** (*opzionale*) Per utilizzare gli scripts in questo repository e magari modificarli è consigliato utilizzare un VCS (*version control system*). Git è un sistema di controllo versione distribuito, 
     che permette di tenere traccia delle modifiche ai file, e di collaborare con altri sviluppatori. Anche se non si è sviluppatori, git è molto utile per scaricare e aggiornare i file 
     di questo repository, e per tenere traccia delle modifiche che si fanno ai file. Se non si intende modificare gli script, o modificarli solo per se stessi, senza condividerli con altri,
     git non è necessario. In ogni caso, è molto facile da installare e usare, e ci sono molti tutorial e guide in rete.
@@ -65,7 +65,7 @@ con il comando `python -m venv nome_ambiente` si crea un ambiente virtuale, e co
 * [Mamba](https://mamba.readthedocs.io/en/latest/) è la versione in C++ di Conda, e permette di creare e gestire ambienti virtuali in modo molto più veloce di Conda. 
    Mamba è molto utile per chi ha bisogno di creare e gestire molti ambienti virtuali, e per chi ha bisogno di velocizzare l'installazione di moduli e ambienti virtuali.
 
-### Installazione e configurazuione di pywikibot
+### 2. Installazione e configurazuione di pywikibot
 
 Una volta installato Python, è possibile installare pywikibot con il comando `pip install pywikibot`. Questo comando scaricherà e installerà
 pywikibot e tutti i moduli di cui ha bisogno. Se state utilizzando un ambiente virtuale, è consigliato installare pywikibot in un ambiente virtuale (vedi sopra).
@@ -92,7 +92,7 @@ wikitextparser version: 0.55.7
 ```
 
 
-Una volta installato è necessario configurarlo. Per farlo, basta eseguire il comando `python pwb.py generate_user_files` e seguire le istruzioni.
+Una volta installato è necessario configurarlo. Per farlo, basta eseguire il comando `pwb generate_user_files` e seguire le istruzioni.
 Pywikibot ti porrà una serie di domande (nome utente, password, lingua, progetto wikimedia ecc.), e creerà un file di configurazione chiamato
 `user-config.py` simile al seguente:
 
@@ -119,7 +119,10 @@ Il file può essere modificato a piacere, e contiene tutte le impostazioni di py
   Un altro vantaggio delle password Bot è che è possibile stabilire in maniera precisa quali permessi dare al bot, e di revocarli in qualsiasi momento.
 - il percorso degli script (user_script_paths): dove si trovano gli scritti personalizzati, vedi punto seguente.
 
-### 2. Esecuzione degli script
+
+Il file vi permetterà di eseguire `pwb login` per autenticarvi, e di eseguire gli script in questo repository.
+
+### 3. Esecuzione degli script
 
 Uno dei parametri precedenti è il percorso degli script. Gli script sono file Python che possono essere eseguiti direttamente da riga di comando.
 Dai un'occhiata alla cartella [bot/wikivoyage/scripts](./bot/wikivoyage/scripts) per vedere quali script sono disponibili in questo repository.
@@ -129,17 +132,18 @@ Le opzioni possono essere quelle [standard di pywikibot](https://doc.wikimedia.o
 
 Tra le opzioni standard ci sono ad esempio:
 
-`-cat:NomeCategoria` - per processare tutti i file in una specifica categoria
-`-simulate` - per eseguire lo script in modalità simulazione, senza fare modifiche
-`-log` - per creare un log file con tutte le operazioni eseguite
-e molte altre
+* `-cat:NomeCategoria` - per processare tutti i file in una specifica categoria
+* `-simulate` - per eseguire lo script in modalità simulazione, senza fare modifiche
+* `-log` - per creare un log file con tutte le operazioni eseguite
+* `.limit:10` - per limitare il numero di file processati a 10 (o a qualsiasi altro numero)
+* ...e molte altre
 
 Per le opzioni specifiche di uno script, consulta il file Markdown corrispondente. Vedi [CompleteWikidataItem](./bot/wikivoyage/scripts/ItemlistWikidataCompleter.md) per un esempio.
 
 
 ## Sum up
 
-In sostanza, per poter eseguire gli script in questo repository, è necessario:
+In sostanza, per poter eseguire gli script in questo repository, è semplice. Vi basterà:
 
 1. Avere Python sul proprio computer
 2. Avere pywikibot installato (con i moduli ausiliari)
