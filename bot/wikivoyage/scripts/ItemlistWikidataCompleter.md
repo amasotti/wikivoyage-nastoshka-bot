@@ -22,6 +22,14 @@ Then run the script as a normal pywikibot script:
 pwb itemlist_wikidata_completer
 ```
 
+* **Interactive**: In many cases the bot won't be sure about which wikidata item to use. For this reason there is an interactive mode that prompts you to enter
+the correct wikidata item for a given item.
+
+```bash
+pwb itemlist_wikidata_completer -interactive
+```
+
+
 * **With limit**: runs for the first 10 files in the category, see generator parameters for more options
 like `start`, `namespace`, `cat` and so on
 ```bash
