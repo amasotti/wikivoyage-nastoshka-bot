@@ -10,10 +10,10 @@ It's based on
 ## Usage
 
 1. Clone the repo
-1. Install [pywikibot](https://www.mediawiki.org/wiki/Manual:Pywikibot/Installation#Install_Pywikibot)
-2. Generate a user-config.py file with `pwb generate_user_files`
-3. Login with `pwb login`
-4. Run the script (*see below under "Scripts" for more details*):
+2. Install [pywikibot](https://www.mediawiki.org/wiki/Manual:Pywikibot/Installation#Install_Pywikibot)
+3. Generate a user-config.py file with `pwb generate_user_files`
+4. Login with `pwb login`
+5. Run the script (*see below under "Scripts" for more details*):
 
 ## Scripts
 
@@ -22,7 +22,7 @@ It's based on
 name of the category and of the section to be checked
 - [Missing Itemlist Finder](bot/wikivoyage/scripts/MissingItemlistFinder.md) - script to find articles from a given category (usually `Region` or `State`) 
 that lack a list of cities or destinations, despite of referring to larger entities (states, regions)
-- [DynamicMap Filler](bot/wikivoyage/scripts/DynamicMapFiller.md) - script to fill the `dynamicmap` lat and long parameter in articles that lack it
+- [DynamicMap Filler](bot/wikivoyage/scripts/FixEmptyDynamicMap.md) - script to fill the `dynamicmap` lat and long parameter in articles that lack it
 
 
 ### Utilities
