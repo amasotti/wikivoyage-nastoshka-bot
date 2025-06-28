@@ -6,9 +6,9 @@ from pywikibot import ItemPage
 from pywikibot.pagegenerators import WikidataSPARQLPageGenerator
 
 # --- Wikidata properties ---
-IS_INSTANCE_OF = 'P31'
-IS_DISAMBIGUATION = 'Q4167410'
-COORDINATES = 'P625'
+IS_INSTANCE_OF = "P31"
+IS_DISAMBIGUATION = "Q4167410"
+COORDINATES = "P625"
 
 
 class WikibaseHelper:
@@ -39,17 +39,17 @@ class WikibaseHelper:
 
     @staticmethod
     def _truncate_coordinates(coords):
-        return tuple(format(x, '.6g') for x in coords)
+        return tuple(format(x, ".6g") for x in coords)
 
-    def get_coords(self, wikidata_entity : ItemPage):
+    def get_coords(self, wikidata_entity: ItemPage):
         item_dict = wikidata_entity.get()
         claims = item_dict["claims"]
         coords = {"lat": None, "long": None}
         if COORDINATES in claims:
             for claim in claims[COORDINATES]:
                 raw_coords = claim.getTarget().lat, claim.getTarget().lon
-                coords["lat"] = format(raw_coords[0], '.6g')
-                coords["long"] = format(raw_coords[1], '.6g')
+                coords["lat"] = format(raw_coords[0], ".6g")
+                coords["long"] = format(raw_coords[1], ".6g")
         return coords
 
     def get_lat_long(self, wikidata_label):
@@ -87,31 +87,39 @@ class WikibaseHelper:
             city_name = city_name.replace("[[", "").replace("]]", "")
 
         # Remove alternative names
-        city_name = re.sub(r'\|.*', '', city_name)
+        city_name = re.sub(r"\|.*", "", city_name)
 
         return city_name
 
-    def get_wikidata_entity_by_wikipedia_article_name(self, article_name: str, alt: str, lang='it') -> str:
+    def get_wikidata_entity_by_wikipedia_article_name(
+        self, article_name: str, alt: str, lang="it"
+    ) -> str:
         # Try languages in the given order until we find one
-        for attempted_lang in [lang, 'en']:
+        for attempted_lang in [lang, "en"]:
             wikidata_item = self.try_entity_retrieval(article_name, attempted_lang)
             if wikidata_item:
                 break
         # Lastly, try alt name in English if entity is still not found
         if not wikidata_item:
-            wikidata_item = self.try_entity_retrieval(alt, 'en')
+            wikidata_item = self.try_entity_retrieval(alt, "en")
         return self.finalize_wikidata_item(wikidata_item, article_name)
 
     def try_entity_retrieval(self, article_name, lang) -> str | None:
-        item: str | None = self.run_query_for_label(article_name, lang, limit=1)  # limit=1 to avoid multiple results
+        item: str | None = self.run_query_for_label(
+            article_name, lang, limit=1
+        )  # limit=1 to avoid multiple results
         return item if item else None
 
     def finalize_wikidata_item(self, wikidata_item: str, article_name: str) -> str:
         if not wikidata_item:
-            print(f"\t\tCould not find wikidata item for {article_name} -- keeping empty")
+            print(
+                f"\t\tCould not find wikidata item for {article_name} -- keeping empty"
+            )
             return ""
         elif self.is_disambiguation(wikidata_item):
-            self.write_log_line(f"Wikidata item for {article_name} is a disambiguation page\n")
+            self.write_log_line(
+                f"Wikidata item for {article_name} is a disambiguation page\n"
+            )
             return ""
         else:
             return wikidata_item
@@ -123,13 +131,13 @@ class WikibaseHelper:
         :return:
         """
         gen = WikidataSPARQLPageGenerator(
-            query,
-            site=self.site,
-            endpoint='https://query.wikidata.org/sparql'
+            query, site=self.site, endpoint="https://query.wikidata.org/sparql"
         )
         return gen
 
-    def run_query_for_label(self, entity_label, lang='it', limit=1) -> str | list[str] | None:
+    def run_query_for_label(
+        self, entity_label, lang="it", limit=1
+    ) -> str | list[str] | None:
         """
         Get the Wikidata item for a city if a corresponding wp article in italian or english exists
         :param limit:  if 1, return only the first result, else return a list of results
@@ -148,9 +156,7 @@ class WikibaseHelper:
         }}"""
 
         gen = WikidataSPARQLPageGenerator(
-            query,
-            site=self.site,
-            endpoint='https://query.wikidata.org/sparql'
+            query, site=self.site, endpoint="https://query.wikidata.org/sparql"
         )
         # make sure that the generator is not empty and is of length 1
         # (otherwise we have a problem)
@@ -158,7 +164,9 @@ class WikibaseHelper:
 
         if limit == 1:
             if len(pages) != 1:
-                print(f"\tFound zero or multiple wikidata item for {entity_label} -- skipping")
+                print(
+                    f"\tFound zero or multiple wikidata item for {entity_label} -- skipping"
+                )
                 return None
             return pages[0].title()
         else:
@@ -187,7 +195,7 @@ class WikibaseHelper:
         :param file: the log file
         :return: None
         """
-        with open(file, 'a') as f:
+        with open(file, "a") as f:
             f.write(text)
             f.close()
 
@@ -228,7 +236,11 @@ class WikibaseHelper:
         if "P131" in claims:
             for claim in claims["P131"]:
                 entity = claim.getTarget()
-                label = entity.labels["it"] if "it" in entity.labels else entity.labels["en"]
+                label = (
+                    entity.labels["it"]
+                    if "it" in entity.labels
+                    else entity.labels["en"]
+                )
                 return label
         return None
 

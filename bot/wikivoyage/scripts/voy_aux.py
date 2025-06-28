@@ -2,6 +2,7 @@ import re
 from enum import Enum
 from typing import Iterable
 import pywikibot
+import logging
 from mwparserfromhell.nodes import Template
 from mwparserfromhell.wikicode import Wikicode
 
@@ -31,7 +32,7 @@ class ArticleTypeLookup:
         ArticleTypeCategories.COUNTRY.value: ArticleTypes.COUNTRY,
         ArticleTypeCategories.DISTRICT.value: ArticleTypes.DISTRICT,
         ArticleTypeCategories.PARK.value: ArticleTypes.PARK,
-        ArticleTypeCategories.ARCHEOLOGICAL_SITE.value: ArticleTypes.ARCHEOLOGICAL_SITE
+        ArticleTypeCategories.ARCHEOLOGICAL_SITE.value: ArticleTypes.ARCHEOLOGICAL_SITE,
     }
 
     @classmethod
@@ -45,15 +46,15 @@ class ArticleTypeLookup:
 
 
 def format_quickbar(line):
-    return re.sub(r'\|\s*([^=]+?)\s*=\s*(.*?)\s*(?=\||$)', r'| \1 = \2', line)
+    return re.sub(r"\|\s*([^=]+?)\s*=\s*(.*?)\s*(?=\||$)", r"| \1 = \2", line)
 
 
 def format_listing(line):
-    return re.sub(r'\|\s*([^=]+)\s*=\s*(.*?)\s*(?=[|\n])', r'| \1=\2 ', line)
+    return re.sub(r"\|\s*([^=]+)\s*=\s*(.*?)\s*(?=[|\n])", r"| \1=\2 ", line)
 
 
 def format_inline(line):
-    return re.sub(r'\|\s*([^=]+)\s*=\s*', r'| \1=', line.strip())
+    return re.sub(r"\|\s*([^=]+)\s*=\s*", r"| \1=", line.strip())
 
 
 def format_template_params(text):
@@ -69,20 +70,20 @@ def format_template_params(text):
 
     # Define templates and their formatting functions
     templates = {
-        'quickbarairport': format_quickbar,
-        'see': format_listing,
-        'do': format_listing,
-        'eat': format_listing,
-        'buy': format_listing,
-        'sleep': format_listing,
-        'drink': format_listing,
-        'listing': format_listing,
-        'marker': format_inline,
-        'Destinazione': format_inline,
-        'Città': format_inline,
-        'Destinationlist': format_quickbar,
-        'Regionlist': format_quickbar,
-        'MappaDinamica': format_quickbar,
+        "quickbarairport": format_quickbar,
+        "see": format_listing,
+        "do": format_listing,
+        "eat": format_listing,
+        "buy": format_listing,
+        "sleep": format_listing,
+        "drink": format_listing,
+        "listing": format_listing,
+        "marker": format_inline,
+        "Destinazione": format_inline,
+        "Città": format_inline,
+        "Destinationlist": format_quickbar,
+        "Regionlist": format_quickbar,
+        "MappaDinamica": format_quickbar,
     }
 
     def format_params(match):
@@ -93,22 +94,34 @@ def format_template_params(text):
             return match.group(0)
 
         params = match.group(2)
-        param_lines = params.split('\n')
+        param_lines = params.split("\n")
         formatted_lines = [format_function(line) for line in param_lines]
 
-        formatted_params = ' '.join(formatted_lines) if format_function == format_inline else '\n'.join(formatted_lines)
-        template_format = '{{' + template_name + '{}{}'.format('\n' if format_function != format_inline else ' ',
-                                                               formatted_params) + '}}'
+        formatted_params = (
+            " ".join(formatted_lines)
+            if format_function == format_inline
+            else "\n".join(formatted_lines)
+        )
+        template_format = (
+            "{{"
+            + template_name
+            + "{}{}".format(
+                "\n" if format_function != format_inline else " ", formatted_params
+            )
+            + "}}"
+        )
 
         return template_format
 
-    template_pattern = r'\{\{\s*([^}|]+)\s*(\|[^}]+)\}\}'
+    template_pattern = r"\{\{\s*([^}|]+)\s*(\|[^}]+)\}\}"
     formatted_text = re.sub(template_pattern, format_params, text, flags=re.IGNORECASE)
 
     return formatted_text
 
 
-def terminate_before_section_level_two(text: str, exception: str = ["Da sapere"]) -> str:
+def terminate_before_section_level_two(
+    text: str, exception: str = ["Da sapere"]
+) -> str:
     """
     Add {{-}} directly after the text preceding a level two section, followed by one newline.
 
@@ -118,7 +131,7 @@ def terminate_before_section_level_two(text: str, exception: str = ["Da sapere"]
     Returns:
         str: The text with {{-}} added before level two sections.
     """
-    section_pattern = r'(.*?)(\n*)(?<!\=)==\s*([^=].*?)\s*==(?!=)'
+    section_pattern = r"(.*?)(\n*)(?<!\=)==\s*([^=].*?)\s*==(?!=)"
 
     def replace_section(match):
         preceding_text = match.group(1)  # Extract the text preceding the section
@@ -152,7 +165,9 @@ def add_quickbar_image(templates: Iterable[Template], image: str) -> str:
             break
 
 
-def add_mappa_dinamica(page_text: Wikicode, templates: Iterable[Template], coords, zoom=8):
+def add_mappa_dinamica(
+    page_text: Wikicode, templates: Iterable[Template], coords, zoom=8
+):
     # If there is already a dynamic map, ignore the rest
     if _check_mappa_dinamica_exist(templates):
         return
@@ -163,14 +178,41 @@ def add_mappa_dinamica(page_text: Wikicode, templates: Iterable[Template], coord
             for template in templates:
                 try:
                     if template.name == "Regionlist\n":
-                        template.add("regionInteractiveMap", "map1", before=template.get("region1name"))
-                        template.add("regionmapLat", coords["lat"], preserve_spacing=True, before=template.get("region1name"))
-                        template.add("regionmapLong", coords["long"], preserve_spacing=True, before=template.get("region1name"))
-                        template.add("regionmapsize", "450px", preserve_spacing=True, before=template.get("region1name"))
-                        template.add("regionmapZoom", str(zoom) + "\n\n", preserve_spacing=True, before=template.get("region1name"))
+                        template.add(
+                            "regionInteractiveMap",
+                            "map1",
+                            before=template.get("region1name"),
+                        )
+                        template.add(
+                            "regionmapLat",
+                            coords["lat"],
+                            preserve_spacing=True,
+                            before=template.get("region1name"),
+                        )
+                        template.add(
+                            "regionmapLong",
+                            coords["long"],
+                            preserve_spacing=True,
+                            before=template.get("region1name"),
+                        )
+                        template.add(
+                            "regionmapsize",
+                            "450px",
+                            preserve_spacing=True,
+                            before=template.get("region1name"),
+                        )
+                        template.add(
+                            "regionmapZoom",
+                            str(zoom) + "\n\n",
+                            preserve_spacing=True,
+                            before=template.get("region1name"),
+                        )
                         break
                 except:
-                    pywikibot.error("Error adding dynamic map to region list, template: " + str(template))
+                    logging.error(
+                        "Error adding dynamic map to region list, template: "
+                        + str(template)
+                    )
                     raise ValueError("Error adding dynamic map to region list")
         else:
             # If there is no region list and no dynamic map, add the dynamic map and the region list
@@ -183,7 +225,9 @@ def add_mappa_dinamica(page_text: Wikicode, templates: Iterable[Template], coord
                 template.add("z", str(zoom), preserve_spacing=False)
                 template.add("view", "Kartographer\n", preserve_spacing=False)
             except:
-                pywikibot.error("Error creating dynamic map template for page: " + str(template))
+                logging.error(
+                    "Error creating dynamic map template for page: " + str(template)
+                )
                 raise ValueError("Error creating dynamic map template")
 
             sections = page_text.get_sections(levels=[2], flat=True)
@@ -196,7 +240,8 @@ def add_mappa_dinamica(page_text: Wikicode, templates: Iterable[Template], coord
                 except:
                     continue
     except:
-        pywikibot.error("Error adding dynamic map to page: ")
+        logging.error("Error adding dynamic map to page: ")
+
 
 def _check_mappa_dinamica_exist(templates: Iterable[Template]) -> bool:
     for template in templates:
@@ -213,8 +258,8 @@ def _check_region_list_exist(templates: Iterable[Template]) -> bool:
 
 
 def format_section_begin(text: str) -> str:
-    section_pattern = r'(?<!\=)==\s*([^=].*?)\s*==(?!=)(.*?)\n(?!$)'
-    formatted_text = re.sub(section_pattern, r'== \1 ==\n\2\n', text, flags=re.DOTALL)
+    section_pattern = r"(?<!\=)==\s*([^=].*?)\s*==(?!=)(.*?)\n(?!$)"
+    formatted_text = re.sub(section_pattern, r"== \1 ==\n\2\n", text, flags=re.DOTALL)
 
     return formatted_text
 
@@ -231,7 +276,7 @@ def format_section_titles(text):
     """
 
     # Define the regex pattern for matching section titles of all levels
-    section_pattern = r'(={2,})\s*(.*?)\s*\1'
+    section_pattern = r"(={2,})\s*(.*?)\s*\1"
 
     # Function to format section titles
     def format_title(match):
@@ -239,7 +284,7 @@ def format_section_titles(text):
         title = match.group(2).strip()  # Extract and strip the section title
 
         # Format the section title with spaces between equal signs and the title
-        return f'{equal_signs} {title} {equal_signs}'
+        return f"{equal_signs} {title} {equal_signs}"
 
     # Use the sub() function to replace the matched text with formatted section titles
     formatted_text = re.sub(section_pattern, format_title, text)

@@ -1,8 +1,9 @@
 import re
 
+
 def transform_wikimedia_list(file_path):
     # Read the input text from a file
-    with open(file_path, 'r', encoding='utf-8') as file:
+    with open(file_path, "r", encoding="utf-8") as file:
         input_text = file.read()
 
     # Regular expression to match island names and descriptions
@@ -23,6 +24,7 @@ def transform_wikimedia_list(file_path):
 
     return template
 
+
 def check_if_already_wikilink(text):
     """
     Check if the specified text is already a wikilink.
@@ -34,15 +36,18 @@ def check_if_already_wikilink(text):
     """
     return text.startswith("[[") and text.endswith("]]")
 
+
 # File paths
-input_file_path = 'output/raw.txt'  # Replace with your input file path
-output_file_path = 'output/citylist_transformed.txt'  # Replace with your desired output file path
+input_file_path = "output/raw.txt"  # Replace with your input file path
+output_file_path = (
+    "output/citylist_transformed.txt"  # Replace with your desired output file path
+)
 
 # Transform the input text
 formatted_output = transform_wikimedia_list(input_file_path)
 
 # Write the output to a file
-with open(output_file_path, 'w', encoding='utf-8') as file:
+with open(output_file_path, "w", encoding="utf-8") as file:
     file.write(formatted_output)
 
 print(f"Transformation complete. Output written to {output_file_path}")

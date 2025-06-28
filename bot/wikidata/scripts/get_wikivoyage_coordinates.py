@@ -1,8 +1,6 @@
 import pywikibot
-from pywikibot.bot import BaseBot
-from pywikibot.pagegenerators import WikidataSPARQLPageGenerator
 
-COORDINATES_PROPERTY = 'P625'
+COORDINATES_PROPERTY = "P625"
 
 
 class EntityCoordinateGetter(object):
@@ -13,7 +11,7 @@ class EntityCoordinateGetter(object):
 
     @staticmethod
     def _truncate_coordinates(coords):
-        return tuple(format(x, '.6g') for x in coords)
+        return tuple(format(x, ".6g") for x in coords)
 
     def get_lat_long(self):
         """
@@ -65,6 +63,7 @@ class EntityCoordinateGetter(object):
 #     query = query.replace("%(entity)", entity)
 #     return query
 
+
 def get_wikidata_item_from_args(args):
     item_param = [arg for arg in args if arg.startswith("-item:")][0]
 
@@ -84,5 +83,5 @@ def main():
     bot.run()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

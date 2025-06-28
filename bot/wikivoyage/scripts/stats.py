@@ -23,9 +23,8 @@ LIMIT 20
     gen = wbase.run_query(query)
 
     for page in gen:
-        print (page.title())
+        print(page.title())
 
 
-
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

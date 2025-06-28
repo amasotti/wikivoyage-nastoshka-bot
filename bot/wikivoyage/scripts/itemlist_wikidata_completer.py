@@ -4,11 +4,17 @@ import mwparserfromhell
 import pywikibot
 from mwparserfromhell.nodes import Template
 from mwparserfromhell.wikicode import Wikicode
+from pywikibot import logging
 from pywikibot.bot import ExistingPageBot
 from WikibaseHelper import WikibaseHelper
 from pwb_aux import setup_generator
-from voy_aux import format_template_params, terminate_before_section_level_two, add_quickbar_image, add_banner_image, \
-    add_mappa_dinamica
+from voy_aux import (
+    format_template_params,
+    terminate_before_section_level_two,
+    add_quickbar_image,
+    add_banner_image,
+    add_mappa_dinamica,
+)
 
 # --- it.wikivoyage specific constants ---
 DESTINATION_TEMPLATE_ITEM_NAME = "Destinazione"
@@ -62,13 +68,13 @@ class ItemListWikidataCompleter(ExistingPageBot):
                  - "watch": A string indicating whether to watch the page for changes.
                             Possible values are "watch", "unwatch" (default: "nochange").
                  - "minor": A boolean indicating whether the edit should be marked as minor (default: True).
-                 - "botflag": A boolean indicating whether the edit should be flagged as a bot edit (default: True).
+                 - "bot": A boolean indicating whether the edit should be flagged as a bot edit (default: True).
         """
         return {
             "summary": f"Completo itemlists con codici wikidata",
             "watch": "nochange",
             "minor": False,
-            "botflag": True
+            "bot": True,
         }
 
     def get_current_page_url(self):
@@ -108,7 +114,7 @@ class ItemListWikidataCompleter(ExistingPageBot):
         # Format the page
         wikicode_str = str(wikicode)
         wikicode_str = format_template_params(wikicode_str)
-        #wikicode_str = terminate_before_section_level_two(wikicode_str)
+        # wikicode_str = terminate_before_section_level_two(wikicode_str)
 
         self._apply_changes(wikicode_str)
 
@@ -120,7 +126,9 @@ class ItemListWikidataCompleter(ExistingPageBot):
         """
         if content != self.current_page.text:
             pywikibot.showDiff(self.current_page.text, content)
-            prompt = self.user_confirm(f'Do you want to accept these changes for {self.get_current_page_url()}?')
+            prompt = self.user_confirm(
+                f"Do you want to accept these changes for {self.get_current_page_url()}?"
+            )
             if prompt:
                 self.current_page.text = content
                 self.current_page.save(**self.edit_opts)
@@ -156,15 +164,23 @@ class ItemListWikidataCompleter(ExistingPageBot):
                 self.process_user_given_wikidata_id(name_label, template)
                 continue
 
-            pywikibot.warning(f"\tCould not find wikidata item for {name_label} -- keeping empty")
+            logging.warning(
+                f"\tCould not find wikidata item for {name_label} -- keeping empty"
+            )
 
     def try_retrieve_wikidata_id(self, name_label: str, alt_label: str) -> str:
 
-        wikidata_id = self.wikibase_helper.get_wikidata_entity_by_wikipedia_article_name(name_label, alt_label)
+        wikidata_id = (
+            self.wikibase_helper.get_wikidata_entity_by_wikipedia_article_name(
+                name_label, alt_label
+            )
+        )
 
         return wikidata_id if wikidata_id else ""
 
-    def process_user_given_wikidata_id(self, name_label: str, template: Template) -> None:
+    def process_user_given_wikidata_id(
+        self, name_label: str, template: Template
+    ) -> None:
         """
         Processes the wikidata id given by the user. If the id is valid, it is added to the template.
         :param name_label: str, the name of the item
@@ -175,7 +191,9 @@ class ItemListWikidataCompleter(ExistingPageBot):
         if wikidata_id.startswith("Q"):
             self.process_param_addition(name_label, template, wikidata_id)
 
-    def process_param_addition(self, item_label: str, template: Template, wikidata_id: str) -> None:
+    def process_param_addition(
+        self, item_label: str, template: Template, wikidata_id: str
+    ) -> None:
         self._process_coordinates(item_label, wikidata_id, template)
         self._process_wikidata(item_label, wikidata_id, template)
 
@@ -189,7 +207,9 @@ class ItemListWikidataCompleter(ExistingPageBot):
         :param template: the template to check
         :return: True if the template satisfies the conditions, False otherwise
         """
-        return self._check_target_template(template) and self._check_wikidata_param_needs_processing(template)
+        return self._check_target_template(
+            template
+        ) and self._check_wikidata_param_needs_processing(template)
 
     def _check_target_template(self, template: Template) -> bool:
         """
@@ -199,7 +219,10 @@ class ItemListWikidataCompleter(ExistingPageBot):
         :param template: the template to check
         :return: True if the template is a target template, False otherwise
         """
-        return template.name == CITY_TEMPLATE_ITEM_NAME or template.name == DESTINATION_TEMPLATE_ITEM_NAME
+        return (
+            template.name == CITY_TEMPLATE_ITEM_NAME
+            or template.name == DESTINATION_TEMPLATE_ITEM_NAME
+        )
 
     def _check_wikidata_param_needs_processing(self, template: Template) -> bool:
         """
@@ -210,9 +233,10 @@ class ItemListWikidataCompleter(ExistingPageBot):
         :param template: the template to check
         :return: True if the template needs processing, False otherwise
         """
-        return (not template.has(WIKIDATA_PARAM_NAME)
-                or (template.has(WIKIDATA_PARAM_NAME)
-                    and template.get(WIKIDATA_PARAM_NAME).value.strip() == ""))
+        return not template.has(WIKIDATA_PARAM_NAME) or (
+            template.has(WIKIDATA_PARAM_NAME)
+            and template.get(WIKIDATA_PARAM_NAME).value.strip() == ""
+        )
 
     def _process_coordinates(self, name, wikidata_id, template):
         """
@@ -228,11 +252,23 @@ class ItemListWikidataCompleter(ExistingPageBot):
 
         coords = self.wikibase_helper.get_lat_long(wikidata_id)
         if coords[0] is None:
-            pywikibot.logging.warning(f"\tCould not find coordinates for {name} -- keeping empty")
+            pywikibot.logging.warning(
+                f"\tCould not find coordinates for {name} -- keeping empty"
+            )
         else:
             pywikibot.logging.info(f"\tFound coordinates for {name}: {coords}")
-            template.add(LAT_PARAM_NAME, coords[0], before=DESCRIPTION_PARAM_NAME, preserve_spacing=True)
-            template.add(LON_PARAM_NAME, coords[1], before=DESCRIPTION_PARAM_NAME, preserve_spacing=True)
+            template.add(
+                LAT_PARAM_NAME,
+                coords[0],
+                before=DESCRIPTION_PARAM_NAME,
+                preserve_spacing=True,
+            )
+            template.add(
+                LON_PARAM_NAME,
+                coords[1],
+                before=DESCRIPTION_PARAM_NAME,
+                preserve_spacing=True,
+            )
 
     def _process_wikidata(self, name, wikidata_id, template: Template):
         """
@@ -244,10 +280,17 @@ class ItemListWikidataCompleter(ExistingPageBot):
         :return:
         """
         if wikidata_id == "":
-            pywikibot.logging.error(f"\tCould not find wikidata item for {name} -- keeping empty")
+            pywikibot.logging.error(
+                f"\tCould not find wikidata item for {name} -- keeping empty"
+            )
         else:
             pywikibot.logging.info(f"\tFound wikidata item for {name}: {wikidata_id}")
-            template.add(WIKIDATA_PARAM_NAME, wikidata_id, before=DESCRIPTION_PARAM_NAME, preserve_spacing=True)
+            template.add(
+                WIKIDATA_PARAM_NAME,
+                wikidata_id,
+                before=DESCRIPTION_PARAM_NAME,
+                preserve_spacing=True,
+            )
 
     def _process_quickbar(self, templates: Iterable[Template]):
         image = self.wikibase_helper.get_image(self.current_page.data_item())
@@ -300,9 +343,11 @@ def main():
     local_args = prepare_generator_args()
     generator, options = setup_generator(local_args)
     custom_opts = set_custom_opts(local_args)
-    bot = ItemListWikidataCompleter(generator=generator, custom_opts=custom_opts, **options)
+    bot = ItemListWikidataCompleter(
+        generator=generator, custom_opts=custom_opts, **options
+    )
     bot.run()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

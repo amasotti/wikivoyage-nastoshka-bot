@@ -3,6 +3,7 @@ import re
 
 import mwparserfromhell
 import pywikibot
+from pywikibot import logging
 from pywikibot.bot import ExistingPageBot
 from pwb_aux import setup_generator
 
@@ -30,29 +31,35 @@ class EmptySectionFinder(ExistingPageBot):
                  - "watch": A string indicating whether to watch the page for changes.
                             Possible values are "watch", "unwatch" (default: "nochange").
                  - "minor": A boolean indicating whether the edit should be marked as minor (default: True).
-                 - "botflag": A boolean indicating whether the edit should be flagged as a bot edit (default: True).
+                 - "bot": A boolean indicating whether the edit should be flagged as a bot edit (default: True).
         """
         return {
             "summary": f"Sezione {self.section_name} vuota - categorizzo",
             "watch": "nochange",
             "minor": True,
-            "botflag": True
+            "bot": True,
         }
 
     def treat_page(self):
-        pywikibot.info(f"Checking page: {self.current_page.title()} for empty '{self.section_name}' section")
+        logging.info(
+            f"Checking page: {self.current_page.title()} for empty '{self.section_name}' section"
+        )
 
         content = self.current_page.text
         wikicode = mwparserfromhell.parse(content)
 
-        sections = wikicode.get_sections(matches=self.section_name, include_headings=False)
+        sections = wikicode.get_sections(
+            matches=self.section_name, include_headings=False
+        )
 
         # Make sure we found the standard section with this name
         # there should be only 1 per page
         n_sections = len(sections)
 
         if n_sections > 1 or n_sections == 0:
-            pywikibot.warning(f"Too many '{self.section_name}' sections in {self.current_page.title()}")
+            logging.warning(
+                f"Too many '{self.section_name}' sections in {self.current_page.title()}"
+            )
             return
 
         # Get the section text
@@ -60,7 +67,9 @@ class EmptySectionFinder(ExistingPageBot):
         is_empty = EmptySectionFinder.is_section_empty(str(target_section))
 
         if is_empty:
-            pywikibot.info(f"Found empty '{self.section_name}' section in {self.current_page.title()}")
+            logging.info(
+                f"Found empty '{self.section_name}' section in {self.current_page.title()}"
+            )
 
             if self.action == "dump":
                 pywikibot.output("Found empty section in page:")
@@ -74,7 +83,7 @@ class EmptySectionFinder(ExistingPageBot):
             self.dump_findings()
 
     def dump_findings(self):
-        pywikibot.info(f"Found {len(self.found_matches)} matches")
+        logging.info(f"Found {len(self.found_matches)} matches")
         with open(f"logs/empty_{self.section_name}.txt", "w") as f:
             timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
@@ -86,7 +95,9 @@ class EmptySectionFinder(ExistingPageBot):
             f.write("Matches:\n")
 
             for match in self.found_matches:
-                f.write(f"* [[{match}]] <small>(check eseguito il {timestamp})</small>\n")
+                f.write(
+                    f"* [[{match}]] <small>(check eseguito il {timestamp})</small>\n"
+                )
 
     def add_category(self):
         """Add a category to the current page if it's not already present.
@@ -96,11 +107,17 @@ class EmptySectionFinder(ExistingPageBot):
 
         service_cat_fullname = f"Categoria:{self.service_cat}"
 
-        if service_cat_fullname in [cat.title() for cat in self.current_page.categories()]:
-            pywikibot.info(f"Category {self.service_cat} already present in {self.current_page.title()}")
+        if service_cat_fullname in [
+            cat.title() for cat in self.current_page.categories()
+        ]:
+            logging.info(
+                f"Category {self.service_cat} already present in {self.current_page.title()}"
+            )
             return
 
-        pywikibot.info(f"Adding category {self.service_cat} to {self.current_page.title()}")
+        logging.info(
+            f"Adding category {self.service_cat} to {self.current_page.title()}"
+        )
         self.current_page.text += f"\n[[Categoria:{self.service_cat}]]"
         self.current_page.save(**self.edit_opts)
 
@@ -115,14 +132,18 @@ class EmptySectionFinder(ExistingPageBot):
         :rtype: bool
         """
         # Remove comments
-        text_without_comments = re.sub(r'<!--.*?-->', '', section_text,
-                                       flags=re.DOTALL | re.MULTILINE | re.UNICODE | re.IGNORECASE)
+        text_without_comments = re.sub(
+            r"<!--.*?-->",
+            "",
+            section_text,
+            flags=re.DOTALL | re.MULTILINE | re.UNICODE | re.IGNORECASE,
+        )
 
         # Remove spacing templates
-        text_without_spacing = re.sub(r'\{\{-\}\}', '', text_without_comments)
+        text_without_spacing = re.sub(r"\{\{-\}\}", "", text_without_comments)
 
         # Remove newlines
-        text_without_spacing = text_without_spacing.replace('\n', '')
+        text_without_spacing = text_without_spacing.replace("\n", "")
 
         # Check if there's any content left
         return not text_without_spacing.strip()
@@ -160,13 +181,19 @@ def set_custom_opts(args: list[str]) -> dict[str, str]:
     custom_opts = dict()
 
     if any(arg.startswith("-addcat") for arg in args):
-        custom_opts["addcat"] = args[[arg.startswith("-addcat") for arg in args].index(True)].split(":")[1]
+        custom_opts["addcat"] = args[
+            [arg.startswith("-addcat") for arg in args].index(True)
+        ].split(":")[1]
 
     if any(arg.startswith("-section") for arg in args):
-        custom_opts["section"] = args[[arg.startswith("-section") for arg in args].index(True)].split(":")[1]
+        custom_opts["section"] = args[
+            [arg.startswith("-section") for arg in args].index(True)
+        ].split(":")[1]
 
     if any(arg.startswith("-action") for arg in args):
-        custom_opts["action"] = args[[arg.startswith("-action") for arg in args].index(True)].split(":")[1]
+        custom_opts["action"] = args[
+            [arg.startswith("-action") for arg in args].index(True)
+        ].split(":")[1]
 
     return custom_opts
 
@@ -179,5 +206,5 @@ def main():
     bot.run()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

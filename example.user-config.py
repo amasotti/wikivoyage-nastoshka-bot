@@ -4,9 +4,9 @@
 from typing import Optional, Union
 from pywikibot.backports import List
 
-family = 'wikivoyage'
-mylang = 'it'
-usernames['wikivoyage']['it'] = "YOUR_USERNAME"
+family = "wikivoyage"
+mylang = "it"
+usernames["wikivoyage"]["it"] = "YOUR_USERNAME"
 password_file = "user-password.py"
 log: List[str] = []
 logfilename: Optional[str] = None
@@ -48,4 +48,3 @@ debug_log: List[str] = []
 # sample:
 # user_script_paths = ['scripts.myscripts']
 user_script_paths: List[str] = ["bot/wikivoyage/scripts", "bot/wikidata/scripts"]
-

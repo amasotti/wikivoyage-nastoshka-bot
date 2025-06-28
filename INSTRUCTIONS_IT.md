@@ -85,10 +85,10 @@ Una volta installato, verifica che sia installato correttamente con il comando `
 
 ```
 Pywikibot: pywikibot/__init__.py (, -1 (unknown), 2024/01/13, 21:25:03, UNKNOWN)
-Release version: 8.6.0
+Release version: 10.1.0
 setuptools version: 68.0.0
 mwparserfromhell version: 0.6.6
-wikitextparser version: 0.55.7
+wikitextparser version: 0.56.4
 ```
 
 

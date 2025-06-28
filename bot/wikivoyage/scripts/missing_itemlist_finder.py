@@ -1,6 +1,7 @@
 import datetime
 from enum import Enum
 import pywikibot
+from pywikibot import logging
 from pywikibot.bot import ExistingPageBot
 from pwb_aux import setup_generator
 
@@ -48,7 +49,7 @@ class MissingItemListFinder(ExistingPageBot):
                  - "watch": A string indicating whether to watch the page for changes.
                             Possible values are "watch", "unwatch" (default: "nochange").
                  - "minor": A boolean indicating whether the edit should be marked as minor (default: True).
-                 - "botflag": A boolean indicating whether the edit should be flagged as a bot edit (default: True).
+                 - "bot": A boolean indicating whether the edit should be flagged as a bot edit (default: True).
         """
         summary = ""
         if self.action == AllowedActions.ADD_CAT.value:
@@ -58,30 +59,25 @@ class MissingItemListFinder(ExistingPageBot):
         else:
             summary = "Manutenzione per regioni senza Citylist o Destinationlist"
 
-        return {
-            "summary": summary,
-            "watch": "nochange",
-            "minor": True,
-            "botflag": True
-        }
+        return {"summary": summary, "watch": "nochange", "minor": True, "bot": True}
 
     def handle_categorization(self):
-        pywikibot.info(f"Checking page: {self.current_page.title()} for missing Itemlist")
+        logging.info(f"Checking page: {self.current_page.title()} for missing Itemlist")
 
         # Handle exceptions
         if self.current_page.title() in EXCEPTIONS:
-            pywikibot.info(f"Skipping page {self.current_page.title()}")
+            logging.info(f"Skipping page {self.current_page.title()}")
             return
 
         # Handle excluded titles
         if any(title in self.current_page.title() for title in EXCLUDED_TITLES):
-            pywikibot.info(f"Skipping page {self.current_page.title()}")
+            logging.info(f"Skipping page {self.current_page.title()}")
             return
 
         has_citylist, has_destinationlist = self._check_relevant_templates()
 
         if not has_citylist and not has_destinationlist:
-            pywikibot.info(f"Page {self.current_page.title()} has no Itemlist")
+            logging.info(f"Page {self.current_page.title()} has no Itemlist")
             self.found_matches.append(self.current_page.title())
             if self.action == AllowedActions.ADD_CAT.value:
                 self.categorize()
@@ -90,14 +86,18 @@ class MissingItemListFinder(ExistingPageBot):
 
         # Handle exceptions -- it could be that it was categorized by hand or with an outdated exception list
         if self.current_page.title() in EXCEPTIONS:
-            pywikibot.info(f"Page {self.current_page.title()} is an exception, decategorizing")
+            logging.info(
+                f"Page {self.current_page.title()} is an exception, decategorizing"
+            )
             self.found_matches.append(self.current_page.title())
             if self.action == AllowedActions.REMOVE_CAT.value:
                 self.remove_cat()
 
         # Handle excluded titles
         if any(title in self.current_page.title() for title in EXCLUDED_TITLES):
-            pywikibot.info(f"Page {self.current_page.title()} fulfills excluded title regex, decategorizing")
+            logging.info(
+                f"Page {self.current_page.title()} fulfills excluded title regex, decategorizing"
+            )
             self.found_matches.append(self.current_page.title())
             if self.action == AllowedActions.REMOVE_CAT.value:
                 self.remove_cat()
@@ -106,22 +106,34 @@ class MissingItemListFinder(ExistingPageBot):
         has_citylist, has_destinationlist = self._check_relevant_templates()
 
         if has_citylist or has_destinationlist:
-            pywikibot.info(f"Page {self.current_page.title()} has Itemlist now - decategorizing")
+            logging.info(
+                f"Page {self.current_page.title()} has Itemlist now - decategorizing"
+            )
             self.found_matches.append(self.current_page.title())
             if self.action == AllowedActions.REMOVE_CAT.value:
                 self.remove_cat()
 
     def remove_cat(self):
-        self.current_page.text = self.current_page.text.replace(f"[[Categoria:{self.service_cat}]]", "")
+        self.current_page.text = self.current_page.text.replace(
+            f"[[Categoria:{self.service_cat}]]", ""
+        )
         # Account for cat added in English
-        self.current_page.text = self.current_page.text.replace(f"[[Category:{self.service_cat}]]", "")
+        self.current_page.text = self.current_page.text.replace(
+            f"[[Category:{self.service_cat}]]", ""
+        )
         self.current_page.save(**self.edit_opts)
 
     def treat_page(self):
 
-        if self.action == AllowedActions.ADD_DUMP.value or self.action == AllowedActions.ADD_CAT.value:
+        if (
+            self.action == AllowedActions.ADD_DUMP.value
+            or self.action == AllowedActions.ADD_CAT.value
+        ):
             self.handle_categorization()
-        elif self.action == AllowedActions.REMOVE_CAT.value or self.action == AllowedActions.REMOVE_DUMP.value:
+        elif (
+            self.action == AllowedActions.REMOVE_CAT.value
+            or self.action == AllowedActions.REMOVE_DUMP.value
+        ):
             self.handle_decategorization()
         else:
             raise ValueError(f"Invalid action: {self.action}")
@@ -157,13 +169,15 @@ class MissingItemListFinder(ExistingPageBot):
         return has_citylist, has_destinationlist
 
     def dump_findings(self):
-        pywikibot.info(f"Found {len(self.found_matches)} matches")
+        logging.info(f"Found {len(self.found_matches)} matches")
         with open(f"logs/missing_itemlits.txt", "w") as f:
             timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             f.write(f"Matches for action {self.action}:\n")
 
             for match in self.found_matches:
-                f.write(f"* [[{match}]] <small>(check eseguito il {timestamp})</small>\n")
+                f.write(
+                    f"* [[{match}]] <small>(check eseguito il {timestamp})</small>\n"
+                )
 
     def categorize(self):
         """Add a category to the current page if it's not already present.
@@ -173,11 +187,17 @@ class MissingItemListFinder(ExistingPageBot):
 
         service_cat_fullname = f"Categoria:{self.service_cat}"
 
-        if service_cat_fullname in [cat.title() for cat in self.current_page.categories()]:
-            pywikibot.info(f"Category {self.service_cat} already present in {self.current_page.title()}")
+        if service_cat_fullname in [
+            cat.title() for cat in self.current_page.categories()
+        ]:
+            logging.info(
+                f"Category {self.service_cat} already present in {self.current_page.title()}"
+            )
             return
 
-        pywikibot.info(f"Adding category {self.service_cat} to {self.current_page.title()}")
+        logging.info(
+            f"Adding category {self.service_cat} to {self.current_page.title()}"
+        )
         self.current_page.text += f"\n[[Categoria:{self.service_cat}]]"
         self.current_page.save(**self.edit_opts)
 
@@ -214,10 +234,14 @@ def set_custom_opts(args: list[str]) -> dict[str, str]:
     custom_opts = dict()
 
     if any(arg.startswith("-addcat") for arg in args):
-        custom_opts["addcat"] = args[[arg.startswith("-addcat") for arg in args].index(True)].split(":")[1]
+        custom_opts["addcat"] = args[
+            [arg.startswith("-addcat") for arg in args].index(True)
+        ].split(":")[1]
 
     if any(arg.startswith("-action") for arg in args):
-        custom_opts["action"] = args[[arg.startswith("-action") for arg in args].index(True)].split(":")[1]
+        custom_opts["action"] = args[
+            [arg.startswith("-action") for arg in args].index(True)
+        ].split(":")[1]
 
     return custom_opts
 
@@ -230,5 +254,5 @@ def main():
     bot.run()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

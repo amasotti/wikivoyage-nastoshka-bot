@@ -2,6 +2,7 @@ from typing import Any, Iterable
 
 import mwparserfromhell
 import pywikibot
+import logging
 from pywikibot.bot import ExistingPageBot
 from WikibaseHelper import WikibaseHelper
 from pwb_aux import setup_generator
@@ -33,13 +34,13 @@ class MapCodeQuickbarUpdater(ExistingPageBot):
                  - "watch": A string indicating whether to watch the page for changes.
                             Possible values are "watch", "unwatch" (default: "nochange").
                  - "minor": A boolean indicating whether the edit should be marked as minor (default: True).
-                 - "botflag": A boolean indicating whether the edit should be flagged as a bot edit (default: True).
+                 - "bot": A boolean indicating whether the edit should be flagged as a bot edit (default: True).
         """
         return {
             "summary": f"Fix codice mappa (allineo con wikidata)",
             "watch": "nochange",
             "minor": True,
-            "botflag": True
+            "bot": True,
         }
 
     def treat_page(self):
@@ -73,9 +74,11 @@ class MapCodeQuickbarUpdater(ExistingPageBot):
         for template in templates:
             # Conditions
             is_target_template = template.name == QUICKBAR_TEMPLATE_NAME
-            has_old_value = template.has(QUICKBAR_MAP_PARAM) and template.get(
-                QUICKBAR_MAP_PARAM).value.strip().lower() == self.old_code.strip().lower()
-
+            has_old_value = (
+                template.has(QUICKBAR_MAP_PARAM)
+                and template.get(QUICKBAR_MAP_PARAM).value.strip().lower()
+                == self.old_code.strip().lower()
+            )
 
             if is_target_template and has_old_value:
                 self.matched_pages.append(self.current_page.title())
@@ -83,8 +86,15 @@ class MapCodeQuickbarUpdater(ExistingPageBot):
                 iso_code = self.wikibase_helper.get_iso_3166_1_from_city(wikidata_id)
 
                 if iso_code is not None:
-                    template.add(QUICKBAR_MAP_PARAM, iso_code.upper(), before=QUICKBAR_LAT_PARAM, preserve_spacing=True)
-                    pywikibot.info(f"Updated template {QUICKBAR_TEMPLATE_NAME} on page {self.current_page.title()}")
+                    template.add(
+                        QUICKBAR_MAP_PARAM,
+                        iso_code.upper(),
+                        before=QUICKBAR_LAT_PARAM,
+                        preserve_spacing=True,
+                    )
+                    logging.info(
+                        f"Updated template {QUICKBAR_TEMPLATE_NAME} on page {self.current_page.title()}"
+                    )
             else:
                 continue
 
@@ -96,6 +106,7 @@ class MapCodeQuickbarUpdater(ExistingPageBot):
         pywikibot.output(f"Found {len(self.matched_pages)} pages that were updated:")
         for page in self.matched_pages:
             pywikibot.output(f"\t{page}")
+
 
 def prepare_generator_args() -> list[str]:
     """
@@ -129,7 +140,9 @@ def set_custom_opts(args: list[str]) -> dict[str, str]:
     custom_opts = dict()
 
     if any(arg.startswith("-oldcode") for arg in args):
-        custom_opts["oldcode"] = args[[arg.startswith("-oldcode") for arg in args].index(True)].split(":")[1]
+        custom_opts["oldcode"] = args[
+            [arg.startswith("-oldcode") for arg in args].index(True)
+        ].split(":")[1]
 
     return custom_opts
 
@@ -138,9 +151,11 @@ def main():
     local_args = prepare_generator_args()
     generator, options = setup_generator(local_args)
     custom_opts = set_custom_opts(local_args)
-    bot = MapCodeQuickbarUpdater(generator=generator, custom_opts=custom_opts, **options)
+    bot = MapCodeQuickbarUpdater(
+        generator=generator, custom_opts=custom_opts, **options
+    )
     bot.run()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
