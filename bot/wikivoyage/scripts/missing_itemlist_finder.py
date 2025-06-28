@@ -59,12 +59,7 @@ class MissingItemListFinder(ExistingPageBot):
         else:
             summary = "Manutenzione per regioni senza Citylist o Destinationlist"
 
-        return {
-            "summary": summary,
-            "watch": "nochange",
-            "minor": True,
-            "bot": True
-        }
+        return {"summary": summary, "watch": "nochange", "minor": True, "bot": True}
 
     def handle_categorization(self):
         logging.info(f"Checking page: {self.current_page.title()} for missing Itemlist")
@@ -91,14 +86,18 @@ class MissingItemListFinder(ExistingPageBot):
 
         # Handle exceptions -- it could be that it was categorized by hand or with an outdated exception list
         if self.current_page.title() in EXCEPTIONS:
-            logging.info(f"Page {self.current_page.title()} is an exception, decategorizing")
+            logging.info(
+                f"Page {self.current_page.title()} is an exception, decategorizing"
+            )
             self.found_matches.append(self.current_page.title())
             if self.action == AllowedActions.REMOVE_CAT.value:
                 self.remove_cat()
 
         # Handle excluded titles
         if any(title in self.current_page.title() for title in EXCLUDED_TITLES):
-            logging.info(f"Page {self.current_page.title()} fulfills excluded title regex, decategorizing")
+            logging.info(
+                f"Page {self.current_page.title()} fulfills excluded title regex, decategorizing"
+            )
             self.found_matches.append(self.current_page.title())
             if self.action == AllowedActions.REMOVE_CAT.value:
                 self.remove_cat()
@@ -107,22 +106,34 @@ class MissingItemListFinder(ExistingPageBot):
         has_citylist, has_destinationlist = self._check_relevant_templates()
 
         if has_citylist or has_destinationlist:
-            logging.info(f"Page {self.current_page.title()} has Itemlist now - decategorizing")
+            logging.info(
+                f"Page {self.current_page.title()} has Itemlist now - decategorizing"
+            )
             self.found_matches.append(self.current_page.title())
             if self.action == AllowedActions.REMOVE_CAT.value:
                 self.remove_cat()
 
     def remove_cat(self):
-        self.current_page.text = self.current_page.text.replace(f"[[Categoria:{self.service_cat}]]", "")
+        self.current_page.text = self.current_page.text.replace(
+            f"[[Categoria:{self.service_cat}]]", ""
+        )
         # Account for cat added in English
-        self.current_page.text = self.current_page.text.replace(f"[[Category:{self.service_cat}]]", "")
+        self.current_page.text = self.current_page.text.replace(
+            f"[[Category:{self.service_cat}]]", ""
+        )
         self.current_page.save(**self.edit_opts)
 
     def treat_page(self):
 
-        if self.action == AllowedActions.ADD_DUMP.value or self.action == AllowedActions.ADD_CAT.value:
+        if (
+            self.action == AllowedActions.ADD_DUMP.value
+            or self.action == AllowedActions.ADD_CAT.value
+        ):
             self.handle_categorization()
-        elif self.action == AllowedActions.REMOVE_CAT.value or self.action == AllowedActions.REMOVE_DUMP.value:
+        elif (
+            self.action == AllowedActions.REMOVE_CAT.value
+            or self.action == AllowedActions.REMOVE_DUMP.value
+        ):
             self.handle_decategorization()
         else:
             raise ValueError(f"Invalid action: {self.action}")
@@ -164,7 +175,9 @@ class MissingItemListFinder(ExistingPageBot):
             f.write(f"Matches for action {self.action}:\n")
 
             for match in self.found_matches:
-                f.write(f"* [[{match}]] <small>(check eseguito il {timestamp})</small>\n")
+                f.write(
+                    f"* [[{match}]] <small>(check eseguito il {timestamp})</small>\n"
+                )
 
     def categorize(self):
         """Add a category to the current page if it's not already present.
@@ -174,11 +187,17 @@ class MissingItemListFinder(ExistingPageBot):
 
         service_cat_fullname = f"Categoria:{self.service_cat}"
 
-        if service_cat_fullname in [cat.title() for cat in self.current_page.categories()]:
-            logging.info(f"Category {self.service_cat} already present in {self.current_page.title()}")
+        if service_cat_fullname in [
+            cat.title() for cat in self.current_page.categories()
+        ]:
+            logging.info(
+                f"Category {self.service_cat} already present in {self.current_page.title()}"
+            )
             return
 
-        logging.info(f"Adding category {self.service_cat} to {self.current_page.title()}")
+        logging.info(
+            f"Adding category {self.service_cat} to {self.current_page.title()}"
+        )
         self.current_page.text += f"\n[[Categoria:{self.service_cat}]]"
         self.current_page.save(**self.edit_opts)
 
@@ -215,10 +234,14 @@ def set_custom_opts(args: list[str]) -> dict[str, str]:
     custom_opts = dict()
 
     if any(arg.startswith("-addcat") for arg in args):
-        custom_opts["addcat"] = args[[arg.startswith("-addcat") for arg in args].index(True)].split(":")[1]
+        custom_opts["addcat"] = args[
+            [arg.startswith("-addcat") for arg in args].index(True)
+        ].split(":")[1]
 
     if any(arg.startswith("-action") for arg in args):
-        custom_opts["action"] = args[[arg.startswith("-action") for arg in args].index(True)].split(":")[1]
+        custom_opts["action"] = args[
+            [arg.startswith("-action") for arg in args].index(True)
+        ].split(":")[1]
 
     return custom_opts
 
@@ -231,5 +254,5 @@ def main():
     bot.run()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

@@ -1,3 +1,4 @@
 pywikibot~=10.1.0
 mwparserfromhell~=0.6.6
 wikitextparser~=0.56.4
+black~=25.1.0
