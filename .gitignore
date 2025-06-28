@@ -171,3 +171,5 @@ user-password.py
 output/**/*
 
 .claude
+apicache
+apicache-py3
