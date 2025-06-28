@@ -3,6 +3,7 @@ import re
 
 import mwparserfromhell
 import pywikibot
+from pywikibot import logging
 from pywikibot.bot import ExistingPageBot
 from pwb_aux import setup_generator
 
@@ -30,17 +31,17 @@ class EmptySectionFinder(ExistingPageBot):
                  - "watch": A string indicating whether to watch the page for changes.
                             Possible values are "watch", "unwatch" (default: "nochange").
                  - "minor": A boolean indicating whether the edit should be marked as minor (default: True).
-                 - "botflag": A boolean indicating whether the edit should be flagged as a bot edit (default: True).
+                 - "bot": A boolean indicating whether the edit should be flagged as a bot edit (default: True).
         """
         return {
             "summary": f"Sezione {self.section_name} vuota - categorizzo",
             "watch": "nochange",
             "minor": True,
-            "botflag": True
+            "bot": True
         }
 
     def treat_page(self):
-        pywikibot.info(f"Checking page: {self.current_page.title()} for empty '{self.section_name}' section")
+        logging.info(f"Checking page: {self.current_page.title()} for empty '{self.section_name}' section")
 
         content = self.current_page.text
         wikicode = mwparserfromhell.parse(content)
@@ -52,7 +53,7 @@ class EmptySectionFinder(ExistingPageBot):
         n_sections = len(sections)
 
         if n_sections > 1 or n_sections == 0:
-            pywikibot.warning(f"Too many '{self.section_name}' sections in {self.current_page.title()}")
+            logging.warning(f"Too many '{self.section_name}' sections in {self.current_page.title()}")
             return
 
         # Get the section text
@@ -60,7 +61,7 @@ class EmptySectionFinder(ExistingPageBot):
         is_empty = EmptySectionFinder.is_section_empty(str(target_section))
 
         if is_empty:
-            pywikibot.info(f"Found empty '{self.section_name}' section in {self.current_page.title()}")
+            logging.info(f"Found empty '{self.section_name}' section in {self.current_page.title()}")
 
             if self.action == "dump":
                 pywikibot.output("Found empty section in page:")
@@ -74,7 +75,7 @@ class EmptySectionFinder(ExistingPageBot):
             self.dump_findings()
 
     def dump_findings(self):
-        pywikibot.info(f"Found {len(self.found_matches)} matches")
+        logging.info(f"Found {len(self.found_matches)} matches")
         with open(f"logs/empty_{self.section_name}.txt", "w") as f:
             timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
@@ -97,10 +98,10 @@ class EmptySectionFinder(ExistingPageBot):
         service_cat_fullname = f"Categoria:{self.service_cat}"
 
         if service_cat_fullname in [cat.title() for cat in self.current_page.categories()]:
-            pywikibot.info(f"Category {self.service_cat} already present in {self.current_page.title()}")
+            logging.info(f"Category {self.service_cat} already present in {self.current_page.title()}")
             return
 
-        pywikibot.info(f"Adding category {self.service_cat} to {self.current_page.title()}")
+        logging.info(f"Adding category {self.service_cat} to {self.current_page.title()}")
         self.current_page.text += f"\n[[Categoria:{self.service_cat}]]"
         self.current_page.save(**self.edit_opts)
 

@@ -3,9 +3,9 @@ from typing import Any
 
 import mwparserfromhell
 import pywikibot
+from pywikibot import logging
 from mwparserfromhell.nodes import Template, Node
 from mwparserfromhell.wikicode import Wikicode
-from pywikibot import textlib, cosmetic_changes
 from pywikibot.bot import ExistingPageBot
 from wikitextparser import ExternalLink
 
@@ -48,13 +48,13 @@ class AirportModelApplier(ExistingPageBot):
                  - "watch": A string indicating whether to watch the page for changes.
                             Possible values are "watch", "unwatch" (default: "nochange").
                  - "minor": A boolean indicating whether the edit should be marked as minor (default: True).
-                 - "botflag": A boolean indicating whether the edit should be flagged as a bot edit (default: True).
+                 - "bot": A boolean indicating whether the edit should be flagged as a bot edit (default: True).
         """
         return {
             "summary": f"Applico modello [[Wikivoyage:Modello aeroporto]]",
             "watch": "nochange",
             "minor": False,
-            "botflag": True
+            "bot": True
         }
 
     def init_page(self, item: Any) -> 'pywikibot.page.BasePage':
@@ -161,7 +161,7 @@ class AirportModelApplier(ExistingPageBot):
 
         for sec in sections: # type: Wikicode
             if sec.nodes[0].title.strip() not in SECTIONS_WITH_LISTINGS:
-                pywikibot.error(f"Wrong section: {sec.nodes[0].title.strip()}")
+                logging.error(f"Wrong section: {sec.nodes[0].title.strip()}")
 
             # Check subsections
             if sec.nodes[0].title.strip() == "Come arrivare":
@@ -169,7 +169,7 @@ class AirportModelApplier(ExistingPageBot):
                 due_sections = ["In auto", "In treno", "In autobus"]
                 for subsec in due_sections:
                     if subsec not in str(sec):
-                        pywikibot.error(f"Missing subsection: {subsec}")
+                        logging.error(f"Missing subsection: {subsec}")
 
             elif sec.nodes[0].title.strip() == "Informazioni utili":
                 due_sections = ["=== Noleggio auto ===", "=== Trasferimenti privati ==="]
@@ -187,7 +187,7 @@ class AirportModelApplier(ExistingPageBot):
 
             # Some airports have "Sicurezza" as a subsection, that's not in the model
             if "== Sicurezza ==\n" in str(wikicode):
-                pywikibot.error(f"Found Sicurezza section in {self.current_page.title()}")
+                logging.error(f"Found Sicurezza section in {self.current_page.title()}")
 
 
 

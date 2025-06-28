@@ -4,6 +4,7 @@ import mwparserfromhell
 import pywikibot
 from mwparserfromhell.nodes import Template
 from mwparserfromhell.wikicode import Wikicode
+from pywikibot import logging
 from pywikibot.bot import ExistingPageBot
 from WikibaseHelper import WikibaseHelper
 from pwb_aux import setup_generator
@@ -62,13 +63,13 @@ class ItemListWikidataCompleter(ExistingPageBot):
                  - "watch": A string indicating whether to watch the page for changes.
                             Possible values are "watch", "unwatch" (default: "nochange").
                  - "minor": A boolean indicating whether the edit should be marked as minor (default: True).
-                 - "botflag": A boolean indicating whether the edit should be flagged as a bot edit (default: True).
+                 - "bot": A boolean indicating whether the edit should be flagged as a bot edit (default: True).
         """
         return {
             "summary": f"Completo itemlists con codici wikidata",
             "watch": "nochange",
             "minor": False,
-            "botflag": True
+            "bot": True
         }
 
     def get_current_page_url(self):
@@ -156,7 +157,7 @@ class ItemListWikidataCompleter(ExistingPageBot):
                 self.process_user_given_wikidata_id(name_label, template)
                 continue
 
-            pywikibot.warning(f"\tCould not find wikidata item for {name_label} -- keeping empty")
+            logging.warning(f"\tCould not find wikidata item for {name_label} -- keeping empty")
 
     def try_retrieve_wikidata_id(self, name_label: str, alt_label: str) -> str:
 

@@ -1,6 +1,4 @@
 import pywikibot
-from pywikibot.bot import BaseBot
-from pywikibot.pagegenerators import WikidataSPARQLPageGenerator
 
 COORDINATES_PROPERTY = 'P625'
 

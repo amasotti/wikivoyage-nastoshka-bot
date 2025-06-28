@@ -1,8 +1,9 @@
 import json
-from typing import Optional, Any, Iterable
+from typing import Any, Iterable
 
 import pywikibot
-from pywikibot import WikidataBot, ItemPage
+from pywikibot import logging
+from pywikibot import ItemPage
 
 
 class WdItem:
@@ -48,7 +49,8 @@ class WikidataDestinationImporter():
             new_item = self.handle_administrative_entity(new_item, claims)
             self.handle_body_of_water(new_item, claims)
 
-            print(f"Created item {id} with label {item['labels']['en']}")
+            logging.log("Created item %s with label %s", id, item['labels']['en'])
+            #print(f"Created item {id} with label {item['labels']['en']}")
 
     def handle_coords(self, item: ItemPage, data):
         lat = data['coords']['target']['latitude']

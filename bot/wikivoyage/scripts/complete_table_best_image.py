@@ -3,6 +3,7 @@ import mwparserfromhell
 from mwparserfromhell.nodes import Node, Tag, Template
 from mwparserfromhell.wikicode import Wikicode
 from pywikibot.bot import ExistingPageBot
+from pywikibot import logging
 
 from WikibaseHelper import WikibaseHelper
 from pwb_aux import setup_generator
@@ -16,7 +17,7 @@ class BestImageTableCompleter(ExistingPageBot):
         self.matches = []
         self.wb_helper = WikibaseHelper()
     def treat_page(self) -> None:
-        pywikibot.info(f"Processing page {self.current_page}")
+        logging.info(f"Processing page {self.current_page}")
 
         wikicode = mwparserfromhell.parse(self.current_page.text)
         tables = wikicode.filter_tags(matches=lambda node: node.tag == 'table')

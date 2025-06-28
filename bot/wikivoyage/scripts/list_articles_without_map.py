@@ -1,5 +1,4 @@
 import datetime
-from enum import Enum
 from typing import Any
 
 import mwparserfromhell
@@ -7,6 +6,7 @@ import pywikibot
 from mwparserfromhell.nodes import Template
 from mwparserfromhell.wikicode import Wikicode
 from pywikibot.bot import ExistingPageBot
+from pywikibot import logging
 
 from voy_aux import ArticleTypeCategories, ArticleTypes, ArticleTypeLookup
 from pwb_aux import setup_generator
@@ -38,7 +38,7 @@ class MissingDynamicMapFinder(ExistingPageBot):
             "summary": "Aggiungo mappa dinamica (auto)",
             "watch": "nochange",
             "minor": True,
-            "botflag": True
+            "bot": True
         }
 
     def init_page(self, item: Any) -> 'pywikibot.page.BasePage':
@@ -69,13 +69,13 @@ class MissingDynamicMapFinder(ExistingPageBot):
             self.found_matches.append(self.current_page.title())
             subregions = self.wikibase_helper.get_p_values(self.current_page.data_item(), WIKIDATA_SUBPARTS_PROP)
             if not subregions:
-                pywikibot.info(f"Page {self.current_page.title()} has no subregions")
+                logging.info(f"Page {self.current_page.title()} has no subregions")
                 return
             self.found_matches.append(self.current_page.title())
             self._complete_article(subregions)
         elif has_dynamic_map and not has_regionlist:
             self.no_region_list.append(self.current_page.title())
-            pywikibot.info(f"Page {self.current_page.title()} has no region list but has dynamic map")
+            logging.info(f"Page {self.current_page.title()} has no region list but has dynamic map")
 
     def _create_shape_template(self, territories: list[str]):
 
@@ -131,7 +131,7 @@ class MissingDynamicMapFinder(ExistingPageBot):
 
         if self.current_page.text != str(wikicode):
             pywikibot.showDiff(self.current_page.text, str(wikicode))
-            pywikibot.info(f"SECTION:\n {section}")
+            logging.info(f"SECTION:\n {section}")
             self.user_confirm("Do you want to save these changes?")
 
             # if prompt:
@@ -190,14 +190,14 @@ class MissingDynamicMapFinder(ExistingPageBot):
         self.log_missing_region_list()
 
     def dump_findings(self):
-        pywikibot.info(f"Found {len(self.found_matches)} matches")
+        logging.info(f"Found {len(self.found_matches)} matches")
         with open(f"logs/missing_dynamic_map.txt", "w") as f:
             timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             for match in self.found_matches:
                 f.write(f"* [[{match}]] <small>(check eseguito il {timestamp})</small>\n")
 
     def log_missing_region_list(self):
-        pywikibot.info(f"Found {len(self.no_region_list)} matches")
+        logging.info(f"Found {len(self.no_region_list)} matches")
         with open(f"logs/missing_region_list.txt", "w") as f:
             timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             for match in self.no_region_list:

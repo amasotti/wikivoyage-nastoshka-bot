@@ -170,3 +170,4 @@ user-config.py
 user-password.py
 output/**/*
 
+.claude

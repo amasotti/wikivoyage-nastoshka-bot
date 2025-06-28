@@ -1,5 +1,6 @@
 import mwparserfromhell
 import pywikibot
+from pywikibot import logging
 from pywikibot.bot import ExistingPageBot
 
 # LOCAL IMPORTS
@@ -23,7 +24,7 @@ class DynamicMapFiller(ExistingPageBot):
         self.matches = []
 
     def treat_page(self) -> None:
-        pywikibot.info(f"Processing page {self.current_page}")
+        logging.info(f"Processing page {self.current_page}")
 
         self.matches.append(self.current_page.title())
         content = self.current_page.text
@@ -42,7 +43,7 @@ class DynamicMapFiller(ExistingPageBot):
                                    )
 
     def teardown(self) -> None:
-        pywikibot.info(f"Found {len(self.matches)} matches")
+        logging.info(f"Found {len(self.matches)} matches")
         with open("dynamic_map_matches.txt", "w") as f:
             f.write(f"Found {len(self.matches)} matches\n")
             for match in self.matches:
@@ -59,14 +60,14 @@ class DynamicMapFiller(ExistingPageBot):
             # Conditions (We iterate a category that is supposed to contain only dynamic maps without coordinates)
             if template.name == DYNAMIC_MAP_TEMPLATE:
                 wikidata_id = self.current_page.data_item()
-                pywikibot.info(f"Found wikidata item for {self.current_page}: {wikidata_id.title()}")
+                logging.info(f"Found wikidata item for {self.current_page}: {wikidata_id.title()}")
 
                 coords = self.wd_helper.get_lat_long(wikidata_id.title())
 
                 if coords[0] is None:
-                    pywikibot.warning(f"\tCould not find coordinates for {self.current_page} -- keeping empty")
+                    logging.warning(f"\tCould not find coordinates for {self.current_page} -- keeping empty")
                 else:
-                    pywikibot.info(f"\tFound coordinates for {self.current_page}: {coords}")
+                    logging.info(f"\tFound coordinates for {self.current_page}: {coords}")
                     template.add(DYNAMIC_MAP_LAT_PARAM, str(" " + coords[0]), before=DYNAMIC_MAP_HEIGHT_PARAM,
                                  preserve_spacing=True)
                     template.add(DYNAMIC_MAP_LON_PARAM, str(" " + coords[1]), before=DYNAMIC_MAP_HEIGHT_PARAM,

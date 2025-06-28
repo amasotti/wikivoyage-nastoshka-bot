@@ -4,6 +4,7 @@ from enum import Enum
 
 import mwparserfromhell
 import pywikibot
+import logging
 from pywikibot.bot import ExistingPageBot
 from pwb_aux import setup_generator
 
@@ -27,7 +28,7 @@ class TemplateCrossCat(ExistingPageBot):
         self.found_matches = []
 
     def treat_page(self):
-        pywikibot.info(f"Checking page: {self.current_page.title()}")
+        logging.info(f"Checking page: {self.current_page.title()}")
 
         categories = [cat.title(with_ns=False) for cat in self.current_page.categories()]
 
@@ -35,9 +36,9 @@ class TemplateCrossCat(ExistingPageBot):
         # or that are not in the target category (if self.negative is True)
 
         if (self.target_cat in categories) ^ self.negative:
-            pywikibot.info(f"Found match: {self.current_page.title()} - this has {self.target_cat} and we are looking for {'not ' if self.negative else ''}{self.target_cat}")
+            logging.info(f"Found match: {self.current_page.title()} - this has {self.target_cat} and we are looking for {'not ' if self.negative else ''}{self.target_cat}")
             self.found_matches.append(self.current_page.title())
-            pywikibot.info(f"Found match: {self.current_page.title()}")
+            logging.info(f"Found match: {self.current_page.title()}")
 
     def teardown(self) -> None:
         self.save_results()

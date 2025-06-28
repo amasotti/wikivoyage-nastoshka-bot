@@ -1,6 +1,7 @@
 import datetime
 from enum import Enum
 import pywikibot
+from pywikibot import logging
 from pywikibot.bot import ExistingPageBot
 from pwb_aux import setup_generator
 
@@ -48,7 +49,7 @@ class MissingItemListFinder(ExistingPageBot):
                  - "watch": A string indicating whether to watch the page for changes.
                             Possible values are "watch", "unwatch" (default: "nochange").
                  - "minor": A boolean indicating whether the edit should be marked as minor (default: True).
-                 - "botflag": A boolean indicating whether the edit should be flagged as a bot edit (default: True).
+                 - "bot": A boolean indicating whether the edit should be flagged as a bot edit (default: True).
         """
         summary = ""
         if self.action == AllowedActions.ADD_CAT.value:
@@ -62,26 +63,26 @@ class MissingItemListFinder(ExistingPageBot):
             "summary": summary,
             "watch": "nochange",
             "minor": True,
-            "botflag": True
+            "bot": True
         }
 
     def handle_categorization(self):
-        pywikibot.info(f"Checking page: {self.current_page.title()} for missing Itemlist")
+        logging.info(f"Checking page: {self.current_page.title()} for missing Itemlist")
 
         # Handle exceptions
         if self.current_page.title() in EXCEPTIONS:
-            pywikibot.info(f"Skipping page {self.current_page.title()}")
+            logging.info(f"Skipping page {self.current_page.title()}")
             return
 
         # Handle excluded titles
         if any(title in self.current_page.title() for title in EXCLUDED_TITLES):
-            pywikibot.info(f"Skipping page {self.current_page.title()}")
+            logging.info(f"Skipping page {self.current_page.title()}")
             return
 
         has_citylist, has_destinationlist = self._check_relevant_templates()
 
         if not has_citylist and not has_destinationlist:
-            pywikibot.info(f"Page {self.current_page.title()} has no Itemlist")
+            logging.info(f"Page {self.current_page.title()} has no Itemlist")
             self.found_matches.append(self.current_page.title())
             if self.action == AllowedActions.ADD_CAT.value:
                 self.categorize()
@@ -90,14 +91,14 @@ class MissingItemListFinder(ExistingPageBot):
 
         # Handle exceptions -- it could be that it was categorized by hand or with an outdated exception list
         if self.current_page.title() in EXCEPTIONS:
-            pywikibot.info(f"Page {self.current_page.title()} is an exception, decategorizing")
+            logging.info(f"Page {self.current_page.title()} is an exception, decategorizing")
             self.found_matches.append(self.current_page.title())
             if self.action == AllowedActions.REMOVE_CAT.value:
                 self.remove_cat()
 
         # Handle excluded titles
         if any(title in self.current_page.title() for title in EXCLUDED_TITLES):
-            pywikibot.info(f"Page {self.current_page.title()} fulfills excluded title regex, decategorizing")
+            logging.info(f"Page {self.current_page.title()} fulfills excluded title regex, decategorizing")
             self.found_matches.append(self.current_page.title())
             if self.action == AllowedActions.REMOVE_CAT.value:
                 self.remove_cat()
@@ -106,7 +107,7 @@ class MissingItemListFinder(ExistingPageBot):
         has_citylist, has_destinationlist = self._check_relevant_templates()
 
         if has_citylist or has_destinationlist:
-            pywikibot.info(f"Page {self.current_page.title()} has Itemlist now - decategorizing")
+            logging.info(f"Page {self.current_page.title()} has Itemlist now - decategorizing")
             self.found_matches.append(self.current_page.title())
             if self.action == AllowedActions.REMOVE_CAT.value:
                 self.remove_cat()
@@ -157,7 +158,7 @@ class MissingItemListFinder(ExistingPageBot):
         return has_citylist, has_destinationlist
 
     def dump_findings(self):
-        pywikibot.info(f"Found {len(self.found_matches)} matches")
+        logging.info(f"Found {len(self.found_matches)} matches")
         with open(f"logs/missing_itemlits.txt", "w") as f:
             timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             f.write(f"Matches for action {self.action}:\n")
@@ -174,10 +175,10 @@ class MissingItemListFinder(ExistingPageBot):
         service_cat_fullname = f"Categoria:{self.service_cat}"
 
         if service_cat_fullname in [cat.title() for cat in self.current_page.categories()]:
-            pywikibot.info(f"Category {self.service_cat} already present in {self.current_page.title()}")
+            logging.info(f"Category {self.service_cat} already present in {self.current_page.title()}")
             return
 
-        pywikibot.info(f"Adding category {self.service_cat} to {self.current_page.title()}")
+        logging.info(f"Adding category {self.service_cat} to {self.current_page.title()}")
         self.current_page.text += f"\n[[Categoria:{self.service_cat}]]"
         self.current_page.save(**self.edit_opts)
 

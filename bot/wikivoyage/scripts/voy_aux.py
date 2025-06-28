@@ -2,6 +2,7 @@ import re
 from enum import Enum
 from typing import Iterable
 import pywikibot
+import logging
 from mwparserfromhell.nodes import Template
 from mwparserfromhell.wikicode import Wikicode
 
@@ -170,7 +171,7 @@ def add_mappa_dinamica(page_text: Wikicode, templates: Iterable[Template], coord
                         template.add("regionmapZoom", str(zoom) + "\n\n", preserve_spacing=True, before=template.get("region1name"))
                         break
                 except:
-                    pywikibot.error("Error adding dynamic map to region list, template: " + str(template))
+                    logging.error("Error adding dynamic map to region list, template: " + str(template))
                     raise ValueError("Error adding dynamic map to region list")
         else:
             # If there is no region list and no dynamic map, add the dynamic map and the region list
@@ -183,7 +184,7 @@ def add_mappa_dinamica(page_text: Wikicode, templates: Iterable[Template], coord
                 template.add("z", str(zoom), preserve_spacing=False)
                 template.add("view", "Kartographer\n", preserve_spacing=False)
             except:
-                pywikibot.error("Error creating dynamic map template for page: " + str(template))
+                logging.error("Error creating dynamic map template for page: " + str(template))
                 raise ValueError("Error creating dynamic map template")
 
             sections = page_text.get_sections(levels=[2], flat=True)
@@ -196,7 +197,7 @@ def add_mappa_dinamica(page_text: Wikicode, templates: Iterable[Template], coord
                 except:
                     continue
     except:
-        pywikibot.error("Error adding dynamic map to page: ")
+        logging.error("Error adding dynamic map to page: ")
 
 def _check_mappa_dinamica_exist(templates: Iterable[Template]) -> bool:
     for template in templates:

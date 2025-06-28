@@ -2,6 +2,7 @@ from typing import Any, Iterable
 
 import mwparserfromhell
 import pywikibot
+import logging
 from pywikibot.bot import ExistingPageBot
 from WikibaseHelper import WikibaseHelper
 from pwb_aux import setup_generator
@@ -33,13 +34,13 @@ class MapCodeQuickbarUpdater(ExistingPageBot):
                  - "watch": A string indicating whether to watch the page for changes.
                             Possible values are "watch", "unwatch" (default: "nochange").
                  - "minor": A boolean indicating whether the edit should be marked as minor (default: True).
-                 - "botflag": A boolean indicating whether the edit should be flagged as a bot edit (default: True).
+                 - "bot": A boolean indicating whether the edit should be flagged as a bot edit (default: True).
         """
         return {
             "summary": f"Fix codice mappa (allineo con wikidata)",
             "watch": "nochange",
             "minor": True,
-            "botflag": True
+            "bot": True
         }
 
     def treat_page(self):
@@ -84,7 +85,7 @@ class MapCodeQuickbarUpdater(ExistingPageBot):
 
                 if iso_code is not None:
                     template.add(QUICKBAR_MAP_PARAM, iso_code.upper(), before=QUICKBAR_LAT_PARAM, preserve_spacing=True)
-                    pywikibot.info(f"Updated template {QUICKBAR_TEMPLATE_NAME} on page {self.current_page.title()}")
+                    logging.info(f"Updated template {QUICKBAR_TEMPLATE_NAME} on page {self.current_page.title()}")
             else:
                 continue
 
