@@ -5,7 +5,7 @@ Small Python utility based on `pywikibot` for routine tasks on [Wikivoyage](http
 It's based on 
 
 - Python v. `3.10`
-- Pywikibot v. `8.6.0` (current stable release: [docs](https://doc.wikimedia.org/pywikibot/stable/))
+- Pywikibot v. `10.1.0` (current stable release: [docs](https://doc.wikimedia.org/pywikibot/stable/))
 
 ## Usage
 
